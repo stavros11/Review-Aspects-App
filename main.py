@@ -31,9 +31,9 @@ def aspects(hotelname, word=None):
 
     neg_aspects = (flask_containers.Aspect(hotelname, word, container)
                    for word, _ in container.neg_scores.most_common()[start: end])
-    aspects = zip(pos_aspects, neg_aspects)
 
-    return flask.render_template("aspects.html", aspects=aspects)
+    return flask.render_template("aspects.html", pos_aspects=pos_aspects,
+                                 neg_aspects=neg_aspects, hotelname=hotelname)
 
   word_reviews = container.map[word]
   df = aspects.data
