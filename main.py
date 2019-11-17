@@ -3,6 +3,20 @@ import directories
 from aspects import flask_containers
 app = flask.Flask(__name__)
 
+def review_text(series, word: str) -> str:
+  text = series.text.replace("\n", "<br>")
+  for aspect in series.aspects:
+    text = text.replace(aspect, "<b>{}</b>".format(aspect))
+  text = text.replace(word, "<font color='Tomato'>{}</font>".format(word))
+  return text
+
+
+class MetaData:
+
+  def __init__(self, **kwargs):
+    for k, v in kwargs.items():
+      setattr(self, k, v)
+
 
 @app.route("/aspects/<hotelname>?word=<word>")
 @app.route("/aspects/<hotelname>")
@@ -23,9 +37,13 @@ def aspects(hotelname, word=None):
 
   word_reviews = container.map[word]
   df = aspects.data
-  reviews = ((df.iloc[i], score) for i, score in word_reviews.items())
+  for i, score in word_reviews.items():
+    reviews = ((df.iloc[i], review_text(df.iloc[i], word), score)
+               for i, score in word_reviews.items())
 
-  return flask.render_template("reviews.html", reviews=reviews, word=word)
+  hotel_url = flask.url_for("aspects", hotelname=hotelname)
+  meta = MetaData(word=word, url=hotel_url, hotelname=hotelname)
+  return flask.render_template("reviews.html", reviews=reviews, meta=meta)
 
 
 @app.route('/')
