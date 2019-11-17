@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title> Aspects </title>
+</head>
+<body>
+
+<table>
+  <tr>
+  <th colspan="2" style="padding: 10px 10px 10px 10px;">Positive Aspects</th>
+  <th colspan="2" style="padding: 10px 10px 10px 100px;">Negative Aspects</th>
+  </tr>
+  {% for pos, neg in aspects %}
+    <tr>
+      <td style="padding: 0px 10px 0px 10px;"> <a href={{ pos.url }}>{{ pos.text }}</a> </td>
+      <td>{{ pos.pos_score }}</td>
+      <td style="padding: 0px 10px 0px 100px;">{{ neg.text }}</td>
+      <td>{{ neg.neg_score }}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+</body>
+</html>

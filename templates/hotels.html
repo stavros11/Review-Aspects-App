@@ -1,0 +1,15 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title> Hotels </title>
+</head>
+<body>
+
+  <ul>
+  {% for name, link in hotels.items() %}
+  <li>  <a href={{ link }}>{{ name }}</a>  </li>
+  {% endfor %}
+  </ul>
+
+</body>
+</html>

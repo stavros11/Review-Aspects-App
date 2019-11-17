@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title> Reviews </title>
+</head>
+<body>
+
+  <h1> Reviews with aspect: {{ word }}</h1>
+
+  <ul>
+  {% for data, score in reviews %}
+  <li>  Score: {{ score }}  </li>
+  <p> <a href={{ data.absoluteUrl }}> Read on TripAdvisor! </a>  </p>
+  <p> Date: {{ data.publishedDate }} </p>
+  <p> Trip Advisor Username: {{ data.username }} </p>
+  Review: {{data.text}}
+  {% endfor %}
+  </ul>
+
+</body>
+</html>
