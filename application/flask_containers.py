@@ -7,7 +7,7 @@ from aspects import containers
 import plotly
 from plotly import graph_objects as go
 
-from typing import Optional
+from typing import Optional, Tuple
 
 
 class Aspect:
@@ -76,8 +76,22 @@ class Hotel:
     return flask.url_for("main", hotelname=self.id)
 
   @property
-  def n_reviews(self):
+  def n_reviews(self) -> int:
     return sum(self.ratingCounts)
+
+  @property
+  def n_reviews_aspects_sentiment(self) -> Tuple[int, int, int]:
+    aspects_series = self.aspects.aspects_per_review
+    pos, neutral, neg = 0, 0, 0
+    for aspect_counter in aspects_series:
+      total_sentiment = sum(aspect_counter.values())
+      if total_sentiment > 0:
+        pos += 1
+      elif total_sentiment < 0:
+        neg += 1
+      else:
+        neutral = 0
+    return neg, neutral, pos
 
   @staticmethod
   def encode_plot(plot):
@@ -98,6 +112,14 @@ class Hotel:
     n = len(self.ratingCounts)
     pie = go.Pie(labels=list(range(1, n + 1)), values=self.ratingCounts,
                  marker_colors=self._PIE_COLORS)
+    return self.encode_plot(pie)
+
+  @property
+  def aspects_sentiment_piechart(self):
+    labels = ["Negative", "Neutral", "Positive"]
+    colors = [self._PIE_COLORS[0], self._PIE_COLORS[2], self._PIE_COLORS[-1]]
+    pie = go.Pie(labels=labels, values=list(self.n_reviews_aspects_sentiment),
+                 marker_colors=colors)
     return self.encode_plot(pie)
 
   @property

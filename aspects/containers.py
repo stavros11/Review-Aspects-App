@@ -244,6 +244,10 @@ class DataAspects:
       self.matrix.save("_".join([self.data_dir, "matrix"]))
 
   @property
+  def aspects_per_review(self) -> pd.Series:
+    return self.data[self.aspect_column]
+
+  @property
   def container(self) -> AspectContainers:
     return self._container
 
@@ -265,7 +269,7 @@ class DataAspects:
 
   @property
   def has_negative(self) -> pd.Series:
-    return self.data[self.aspect_column].map(self._contains_negative)
+    return self.aspects_per_review.map(self._contains_negative)
 
   def set_distance_matrix(self, matrix: distance_matrix.DistanceMatrix):
     self._matrix = matrix
