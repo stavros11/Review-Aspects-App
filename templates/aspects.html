@@ -3,7 +3,7 @@
 	<head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>{{ hotelname }}</title>
+	<title>{{ hotel.name }}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
@@ -63,7 +63,7 @@
 					<div class="container">
 						<div class="col-md-12 col-md-offset-0">
 							<div class="animate-box">
-							<h2> {{ hotelname }} </h2>
+							<h2> {{ hotel.name }} </h2>
 							<p class="breadcrumbs"><span><a href="/">Home</a></span>
 							</div>
 						</div>
@@ -79,7 +79,7 @@
                             <table>
                               {% for pos in pos_aspects %}
                                 <tr>
-                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ pos.url }}>{{ pos.text }}</a> </td>
+                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
                                   <td class="admin"> {{ pos.pos_score }} </td>
                                 </tr>
                               {% endfor %}

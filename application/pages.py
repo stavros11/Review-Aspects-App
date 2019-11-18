@@ -11,26 +11,30 @@ def hotels_page():
 
 
 def analysis_page(hotelname: str, word: Optional[str] = None):
-  aspects, container = flask_containers.load_aspects(hotelname, cut_off=0.3)
+  # hotelname is the name of the folder that contains all hotel files
+  hotel = flask_containers.Hotel(hotelname, directories.hotel_db[hotelname])
+
+  # optionally use word2vec to merge words
+  hotel.aspects.merge(cut_off=0.4)
+  container = hotel.aspects.merged_container
+  # alternatively: container = hotel.aspects.container
 
   if word is not None:
-    return view_reviews_page(hotelname, word, aspects, container)
+    return view_reviews_page(word, hotel, container)
 
   pos_aspects = flask_containers.aspects_generator(
-      hotelname, word, "pos_scores", container, start=0, end=50)
+      word, hotel.id, container, "pos_scores", start=0, end=50)
   neg_aspects = flask_containers.aspects_generator(
-      hotelname, word, "neg_scores", container, start=0, end=50)
+      word, hotel.id, container, "neg_scores", start=0, end=50)
 
   return flask.render_template("aspects.html", pos_aspects=pos_aspects,
-                               neg_aspects=neg_aspects, hotelname=hotelname)
+                               neg_aspects=neg_aspects, hotel=hotel)
 
 
-def view_reviews_page(hotelname: str, word: str,
-                      aspects: containers.DataAspects,
+def view_reviews_page(word: str,
+                      hotel: flask_containers.Hotel,
                       container: containers.AspectContainers):
-  reviews = (flask_tools.ReviewView(aspects.data.iloc[i], word)
+  reviews = (flask_tools.ReviewView(hotel.aspects.data.iloc[i], word)
              for i in container.map[word].keys())
-
-  hotel_url = flask.url_for("main", hotelname=hotelname)
-  meta = flask_tools.MetaData(word=word, url=hotel_url, hotelname=hotelname)
-  return flask.render_template("reviews.html", reviews=reviews, meta=meta)
+  return flask.render_template("reviews.html", reviews=reviews, word=word,
+                               hotel=hotel)

@@ -1,35 +1,16 @@
+import os
+import json
 import flask
 from application import directories
 from aspects import containers
-from typing import Tuple
-
-
-def load_aspects(hotelname: str, cut_off: float=0.3
-                 ) -> Tuple[containers.DataAspects, containers.AspectContainers]:
-  aspects = containers.DataAspects.load(directories.hotel_full_dir(hotelname))
-  if cut_off is not None:
-    aspects.merge(cut_off=cut_off)
-    container = aspects.merged_container
-  else:
-    container = aspects.container
-
-  return aspects, container
-
-
-def aspects_generator(hotelname, word, mode: "pos_scores",
-                      container: containers.AspectContainers,
-                      start: int = 0, end: int = 50):
-  counter = getattr(container, mode)
-  for word, _ in counter.most_common()[start: end]:
-    yield Aspect(hotelname, word, container)
 
 
 class Aspect:
 
-  def __init__(self, hotelname: str, word: str,
+  def __init__(self, word: str, hotel_id: str,
                container: containers.AspectContainers):
     self.text = word
-    self.hotel = hotelname
+    self.hotel_id = hotel_id
     self.container = container
 
   @property
@@ -50,4 +31,45 @@ class Aspect:
 
   @property
   def url(self) -> str:
-    return flask.url_for("main", hotelname=self.hotel, word=self.text)
+    return flask.url_for("main", hotelname=self.hotel_id, word=self.text)
+
+
+class Hotel:
+
+  def __init__(self, folder_name: str, pkl_name: str):
+    self.id = folder_name
+    self.pkl_name = pkl_name
+    self.hotel_dir = os.path.join(directories.trip_advisor, self.id)
+    with open(self.find_txt(self.hotel_dir), "r") as file:
+      hotel_data = json.load(file)
+    for k, v in hotel_data.items():
+      setattr(self, k, v)
+
+    self.aspects = containers.DataAspects.load(
+        os.path.join(self.hotel_dir, self.pkl_name))
+
+  @staticmethod
+  def find_txt(data_dir: str):
+    all_files = os.listdir(data_dir)
+    txt = None
+    for file in all_files:
+      if file.split(".")[-1] == "txt":
+        if txt is None:
+          txt = file
+        else:
+          raise ValueError("Multiple .txt files found in {}.".format(data_dir))
+    if txt is None:
+      raise ValueError("Could not find .txt file in {}.".format(data_dir))
+    return os.path.join(data_dir, txt)
+
+  @property
+  def app_url(self):
+    return flask.url_for("main", hotelname=self.id)
+
+
+def aspects_generator(word: str, hotel_id: str,
+                      container: containers.AspectContainers,
+                      mode: str = "pos_scores", start: int = 0, end: int = 50):
+  counter = getattr(container, mode)
+  for word, _ in counter.most_common()[start: end]:
+    yield Aspect(word, hotel_id, container)

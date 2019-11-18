@@ -3,7 +3,7 @@
 	<head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>{{meta.hotelname}} : {{ meta.word }}</title>
+	<title>{{ hotel.name }} : {{ word }}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
@@ -63,8 +63,8 @@
 					<div class="container">
 						<div class="col-md-12 col-md-offset-0">
 							<div class="animate-box">
-							<h2>Reviews with aspect: <font color='Tomato'><b>{{ meta.word }}</font></b> </h2>
-							<p class="breadcrumbs"><span><a href={{ meta.url }}>Back to {{ meta.hotelname }} </a></span>
+							<h2>Reviews with aspect: <font color='Tomato'><b>{{ word }}</font></b> </h2>
+							<p class="breadcrumbs"><span><a href={{ hotel.app_url }}>Back to {{ hotel.name }} </a></span>
 							</div>
 						</div>
 					</div>
