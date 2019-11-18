@@ -1,5 +1,5 @@
 import flask
-import directories
+from application import directories
 from aspects import containers
 from typing import Tuple
 
@@ -14,6 +14,14 @@ def load_aspects(hotelname: str, cut_off: float=0.3
     container = aspects.container
 
   return aspects, container
+
+
+def aspects_generator(hotelname, word, mode: "pos_scores",
+                      container: containers.AspectContainers,
+                      start: int = 0, end: int = 50):
+  counter = getattr(container, mode)
+  for word, _ in counter.most_common()[start: end]:
+    yield Aspect(hotelname, word, container)
 
 
 class Aspect:
@@ -42,4 +50,4 @@ class Aspect:
 
   @property
   def url(self) -> str:
-    return flask.url_for("aspects", hotelname=self.hotel, word=self.text)
+    return flask.url_for("main", hotelname=self.hotel, word=self.text)
