@@ -75,17 +75,19 @@
 				</div>
 			</div>
 
-			<div class="container">
+			<div class="container" style="width: 95%; center; padding-left: 10%;">
 
               <div class="column">
 					<div class="col-md-3 animate-box">
 						<article>
-                            <h3>Positive Aspects</h3>
+                            <center><h3>Positive Aspects</h3></center>
                             <table>
                               {% for pos in pos_aspects %}
                                 <tr>
-                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
-                                  <td class="admin"> {{ pos.pos_score }} </td>
+                                  <td class="admin" style="padding-right: 50px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
+                                  <td class="admin" style="padding-right: 15px;"> {{ pos.pos_score }} </td>
+                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{:0.1f}".format(pos.pos_percentage) }}% </font> </td>
+                                  <td class "admin"> <font color="Tomato">{{ "{:0.1f}".format(pos.neg_percentage) }}% </font> </td>
                                 </tr>
                               {% endfor %}
                             </table>
@@ -96,12 +98,14 @@
 			<div class="column">
 					<div class="col-md-3 animate-box">
 						<article>
-                            <h3>Negative Aspects</h3>
+                            <center><h3>Negative Aspects</h3></center>
                             <table>
                               {% for neg in neg_aspects %}
                                 <tr>
                                   <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ neg.url }}>{{ neg.text }}</a> </td>
-                                  <td class="admin"> {{ neg.neg_score }} </td>
+                                    <td class="admin" style="padding-right: 15px;"> {{ neg.neg_score }} </td>
+                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{:0.1f}".format(neg.pos_percentage) }}% </font> </td>
+                                  <td class "admin"> <font color="Tomato">{{ "{:0.1f}".format(neg.neg_percentage) }}% </font> </td>
                                 </tr>
                               {% endfor %}
                             </table>
@@ -110,7 +114,7 @@
 				</div>
 
                   <div class="column">
-					<div class="col-md-6 animate-box">
+					<div class="col-md-4 animate-box">
 						<article>
                             <center><h3>Rating Counts</h3></center>
                             <center><h4>Number of reviews: {{ hotel.n_reviews }}</h4></center>
@@ -129,7 +133,7 @@
 					</div>
 
 					<div class="column">
-					<div class="col-md-6 animate-box">
+					<div class="col-md-4 animate-box">
 						<article>
                             <center><h3>Aspects Sentiment</h3></center>
                             <div class="chart" id="aspectssentimentpie">
@@ -143,7 +147,7 @@
 						</article>
 					</div>
 
-					<div class="col-md-6 animate-box">
+					<div class="col-md-4 animate-box">
 						<article>
                             <center><h3>Category Ratings</h3></center>
                             <div class="chart" id="categoriesgraph">

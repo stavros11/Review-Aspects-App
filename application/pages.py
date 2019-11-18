@@ -22,9 +22,9 @@ def analysis_page(hotelname: str, word: Optional[str] = None):
     return view_reviews_page(word, hotel, container)
 
   pos_aspects = flask_containers.aspects_generator(
-      word, hotel.id, container, "pos_scores", start=0, end=50)
+      word, hotel, container, "pos_scores", start=0, end=50)
   neg_aspects = flask_containers.aspects_generator(
-      word, hotel.id, container, "neg_scores", start=0, end=50)
+      word, hotel, container, "neg_scores", start=0, end=50)
 
   return flask.render_template("aspects.html", pos_aspects=pos_aspects,
                                neg_aspects=neg_aspects, hotel=hotel)

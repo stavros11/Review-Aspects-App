@@ -10,35 +10,6 @@ from plotly import graph_objects as go
 from typing import Optional, Tuple
 
 
-class Aspect:
-
-  def __init__(self, word: str, hotel_id: str,
-               container: containers.AspectContainers):
-    self.text = word
-    self.hotel_id = hotel_id
-    self.container = container
-
-  @property
-  def pos_score(self) -> float:
-    return self.container.pos_scores[self.text]
-
-  @property
-  def neg_score(self) -> float:
-    return self.container.neg_scores[self.text]
-
-  @property
-  def pos_appearances(self) -> int:
-    return self.container.pos_appearances[self.text]
-
-  @property
-  def neg_appearances(self) -> int:
-    return self.container.neg_appearances[self.text]
-
-  @property
-  def url(self) -> str:
-    return flask.url_for("main", hotelname=self.hotel_id, word=self.text)
-
-
 class Hotel:
 
   def __init__(self, folder_name: str, pkl_name: Optional[str] = None):
@@ -78,6 +49,10 @@ class Hotel:
   @property
   def n_reviews(self) -> int:
     return sum(self.ratingCounts)
+
+  @property
+  def n_data_reviews(self) -> int:
+    return len(self.aspects.data)
 
   @property
   def n_reviews_aspects_sentiment(self) -> Tuple[int, int, int]:
@@ -157,9 +132,46 @@ class Hotel:
     return self.encode_plot(radar)
 
 
-def aspects_generator(word: str, hotel_id: str,
+class Aspect:
+
+  def __init__(self, word: str, hotel: Hotel,
+               container: containers.AspectContainers):
+    self.text = word
+    self.hotel = hotel
+    self.container = container
+
+  @property
+  def pos_score(self) -> float:
+    return self.container.pos_scores[self.text]
+
+  @property
+  def neg_score(self) -> float:
+    return self.container.neg_scores[self.text]
+
+  @property
+  def pos_appearances(self) -> int:
+    return self.container.pos_appearances[self.text]
+
+  @property
+  def pos_percentage(self) -> float:
+    return 100.0 * self.pos_appearances / self.hotel.n_data_reviews
+
+  @property
+  def neg_percentage(self) -> float:
+    return 100.0 * self.neg_appearances / self.hotel.n_data_reviews
+
+  @property
+  def neg_appearances(self) -> int:
+    return self.container.neg_appearances[self.text]
+
+  @property
+  def url(self) -> str:
+    return flask.url_for("main", hotelname=self.hotel.id, word=self.text)
+
+
+def aspects_generator(word: str, hotel: Hotel,
                       container: containers.AspectContainers,
                       mode: str = "pos_scores", start: int = 0, end: int = 50):
   counter = getattr(container, mode)
   for word, _ in counter.most_common()[start: end]:
-    yield Aspect(word, hotel_id, container)
+    yield Aspect(word, hotel, container)
