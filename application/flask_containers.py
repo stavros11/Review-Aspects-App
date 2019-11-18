@@ -3,6 +3,7 @@ import json
 import flask
 from application import directories
 from aspects import containers
+from typing import Optional
 
 
 class Aspect:
@@ -36,9 +37,13 @@ class Aspect:
 
 class Hotel:
 
-  def __init__(self, folder_name: str, pkl_name: str):
+  def __init__(self, folder_name: str, pkl_name: Optional[str] = None):
     self.id = folder_name
-    self.pkl_name = pkl_name
+    if pkl_name is None:
+      self.pkl_name = directories.hotel_db[folder_name]
+    else:
+      self.pkl_name = pkl_name
+
     self.hotel_dir = os.path.join(directories.trip_advisor, self.id)
     with open(self.find_txt(self.hotel_dir), "r") as file:
       hotel_data = json.load(file)

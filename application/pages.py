@@ -5,14 +5,13 @@ from typing import Optional
 
 
 def hotels_page():
-  hotel_urls = {k: flask.url_for("main", hotelname=v)
-                  for k, v in directories.hotel_urls.items()}
-  return flask.render_template("hotels.html", hotels=hotel_urls)
+  hotels = [flask_containers.Hotel(k) for k in directories.hotel_order]
+  return flask.render_template("hotels.html", hotels=hotels)
 
 
 def analysis_page(hotelname: str, word: Optional[str] = None):
   # hotelname is the name of the folder that contains all hotel files
-  hotel = flask_containers.Hotel(hotelname, directories.hotel_db[hotelname])
+  hotel = flask_containers.Hotel(hotelname)
 
   # optionally use word2vec to merge words
   hotel.aspects.merge(cut_off=0.4)
