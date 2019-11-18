@@ -79,13 +79,44 @@ class Hotel:
   def n_reviews(self):
     return sum(self.ratingCounts)
 
+  @staticmethod
+  def encode_plot(plot):
+    return json.dumps([plot], cls=plotly.utils.PlotlyJSONEncoder)
+
   @property
-  def rating_counts_barplot(self):
+  def rating_counts_barchart(self):
     # orientation='h' for horizontal bars
     n = len(self.ratingCounts)
-    bar = go.Bar(x=list(range(1, n + 1)), y=self.ratingCounts, name="Rating Counts")
-    graph_json = json.dumps([bar], cls=plotly.utils.PlotlyJSONEncoder)
-    return graph_json
+    bar = go.Bar(x=list(range(1, n + 1)), y=self.ratingCounts)
+    return self.encode_plot(bar)
+
+  _PIE_COLORS = ["rgb(227,26,28)", "rgb(251,154,153)", "rgb(166,206,227)",
+                 "rgb(129,218,85)", "rgb(51,160,44)"]
+
+  @property
+  def rating_counts_piechart(self):
+    n = len(self.ratingCounts)
+    pie = go.Pie(labels=list(range(1, n + 1)), values=self.ratingCounts,
+                 marker_colors=self._PIE_COLORS)
+    return self.encode_plot(pie)
+
+  @property
+  def additionalrating_radarchart(self):
+    categories, ratings = [], []
+    for category, rating in self.additionalRatings.items():
+      categories.append(category)
+      ratings.append(rating)
+    radar = go.Scatterpolar(r=ratings, theta=categories, fill='toself')
+    return self.encode_plot(radar)
+
+  @property
+  def additionalrating_barchart(self):
+    categories, ratings = [], []
+    for category, rating in self.additionalRatings.items():
+      categories.append(category)
+      ratings.append(rating)
+    radar = go.Bar(y=categories, x=ratings, orientation="h", width=0.3)
+    return self.encode_plot(radar)
 
 
 def aspects_generator(word: str, hotel_id: str,
