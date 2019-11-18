@@ -93,6 +93,14 @@ class Hotel:
         neutral = 0
     return neg, neutral, pos
 
+  @property
+  def n_reviews_hasnegative(self) -> Tuple[int, int]:
+    sentiment = self.aspects.has_negative
+    neg = (sentiment == "Negative").sum()
+    pos = (sentiment == "Positive").sum()
+    neutral = (sentiment == "N/A").sum()
+    return neg, neutral, pos
+
   @staticmethod
   def encode_plot(plot):
     return json.dumps([plot], cls=plotly.utils.PlotlyJSONEncoder)
@@ -119,6 +127,14 @@ class Hotel:
     labels = ["Negative", "Neutral", "Positive"]
     colors = [self._PIE_COLORS[0], self._PIE_COLORS[2], self._PIE_COLORS[-1]]
     pie = go.Pie(labels=labels, values=list(self.n_reviews_aspects_sentiment),
+                 marker_colors=colors)
+    return self.encode_plot(pie)
+
+  @property
+  def aspects_hasnegative_piechart(self):
+    labels = ["Negative", "Neutral", "Positive"]
+    colors = [self._PIE_COLORS[0], self._PIE_COLORS[2], self._PIE_COLORS[-1]]
+    pie = go.Pie(labels=labels, values=list(self.n_reviews_hasnegative),
                  marker_colors=colors)
     return self.encode_plot(pie)
 
