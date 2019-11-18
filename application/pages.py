@@ -28,11 +28,8 @@ def analysis_page(hotelname: str, word: Optional[str] = None):
 def view_reviews_page(hotelname: str, word: str,
                       aspects: containers.DataAspects,
                       container: containers.AspectContainers):
-  word_reviews = container.map[word]
-  df = aspects.data
-  for i, score in word_reviews.items():
-    reviews = ((df.iloc[i], flask_tools.review_text(df.iloc[i], word), score)
-               for i, score in word_reviews.items())
+  reviews = (flask_tools.ReviewView(aspects.data.iloc[i], word)
+             for i in container.map[word].keys())
 
   hotel_url = flask.url_for("main", hotelname=hotelname)
   meta = flask_tools.MetaData(word=word, url=hotel_url, hotelname=hotelname)

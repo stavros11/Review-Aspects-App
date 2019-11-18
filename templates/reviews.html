@@ -72,15 +72,15 @@
 			</div>
 
 			<div class="container">
-                 {% for data, text, score in reviews %}
+                 {% for review in reviews %}
 				<div class="row">
 					<div class="col-md-20 animate-box">
 						<article>
-							<h2><a href={{ data.absoluteUrl }}>{{ data.title }}</a></h2>
-							<p class="admin"><span>{{ data.publishedDate }}</span><br><span>Rating: {{data.rating }} / 5</span><br>
-							<span>Helpful Votes: {{ data.helpfulVotes }}</span></p>
-							<p>{{ text|safe }}</p>
-							<p class="author-wrap"><a href="#" class="author">by {{ data.username }} from {{ data.user_hometownName }}</a></p>
+							<h2><a href={{ review.absoluteUrl }}>{{ review.title }}</a></h2>
+							<p class="admin"><span>{{ review.publishedDate }}</span><br><span>Rating: {{review.rating }} / 5</span><br>
+							<span>Helpful Votes: {{ review.helpfulVotes }}</span></p>
+							<p>{{ review.colored_text|safe }}</p>
+							<p class="author-wrap"><a href="#" class="author">by {{ review.username }} from {{ review.user_hometownName }}</a></p>
 						</article>
 					</div>
 				</div>
