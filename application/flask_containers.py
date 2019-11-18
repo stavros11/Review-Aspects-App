@@ -3,6 +3,10 @@ import json
 import flask
 from application import directories
 from aspects import containers
+
+import plotly
+from plotly import graph_objects as go
+
 from typing import Optional
 
 
@@ -70,6 +74,18 @@ class Hotel:
   @property
   def app_url(self):
     return flask.url_for("main", hotelname=self.id)
+
+  @property
+  def n_reviews(self):
+    return sum(self.ratingCounts)
+
+  @property
+  def rating_counts_barplot(self):
+    # orientation='h' for horizontal bars
+    n = len(self.ratingCounts)
+    bar = go.Bar(x=list(range(1, n + 1)), y=self.ratingCounts, name="Rating Counts")
+    graph_json = json.dumps([bar], cls=plotly.utils.PlotlyJSONEncoder)
+    return graph_json
 
 
 def aspects_generator(word: str, hotel_id: str,
