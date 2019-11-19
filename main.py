@@ -17,10 +17,10 @@ def analysis_page(hotelname: str, word: Optional[str] = None):
   hotel = tools.hotel.Hotel(hotelname)
 
   # optionally use word2vec to merge words
-  hotel.aspects.merge(cut_off=0.4)
-  container = hotel.aspects.merged_container
+  #hotel.aspects.merge(cut_off=0.4)
+  #container = hotel.aspects.merged_container
   # alternatively:
-  #container = hotel.aspects.container
+  container = hotel.aspects.container
 
   if word is not None:
     return view_reviews_page(word, hotel, container)

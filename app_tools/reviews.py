@@ -24,12 +24,12 @@ class ReviewView:
       color = get_color(score)
       if aspect == self.word:
         text = text.replace(
-            " {} ".format(aspect),
-            " <b><font color='{}'>{}</font></b> ".format(color, aspect))
+            "{}".format(aspect),
+            "<b><font color='{}'>{}</font></b>".format(color, aspect))
       else:
         text = text.replace(
-            " {} ".format(aspect),
-            " <font color='{}'>{}</font> ".format(color, aspect))
+            "{}".format(aspect),
+            "<font color='{}'>{}</font>".format(color, aspect))
 
     return text
 
