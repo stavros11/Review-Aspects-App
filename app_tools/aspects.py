@@ -1,3 +1,4 @@
+import collections
 import flask
 from app_tools import hotel
 from aspects import containers
@@ -22,7 +23,8 @@ class Aspect:
 
   @property
   def score(self) -> float:
-    return getattr(self.container, self.mode)[self.text]
+    return self.container.scores[self.text]
+    #return getattr(self.container, self.mode)[self.text]
 
   @property
   def pos_appearances(self) -> int:
@@ -50,6 +52,10 @@ def aspects_generator(container: containers.AspectContainers,
                       hotel: hotel.Hotel,
                       mode: str = "pos_scores",
                       start: int = 0, end: int = 50):
-  counter = getattr(container, mode)
+  #counter = getattr(container, mode)
+  counter = container.scores
+  if mode == "neg_scores":
+    counter = collections.Counter({k: -v for k, v in counter.items()})
+
   for word, _ in counter.most_common()[start: end]:
     yield Aspect(word, hotel, container, mode=mode)
