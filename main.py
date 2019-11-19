@@ -38,9 +38,10 @@ def view_reviews_page(word_mode: str,
                       hotel: tools.hotel.Hotel,
                       container: containers.AspectContainers):
   word, mode = word_mode.split("__")
+  color = tools.reviews.get_color(int(mode == "pos_scores")) # title color
   reviews = tools.reviews.reviews_generator(word, container, hotel, mode)
   return flask.render_template("reviews.html", reviews=reviews, word=word,
-                               hotel=hotel)
+                               hotel=hotel, title_color=color)
 
 
 @app.route("/<hotelname>?word=<word>")

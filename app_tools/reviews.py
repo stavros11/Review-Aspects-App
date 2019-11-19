@@ -3,16 +3,16 @@ from app_tools import hotel
 from aspects import containers
 
 
+def get_color(score: float):
+  return ["Tomato", "MediumSeaGreen"][score > 0]
+
+
 class ReviewView:
 
   def __init__(self, data: pd.Series, word: str):
     self.word = word
     for k, v in data.items():
       setattr(self, k, v)
-
-  @staticmethod
-  def color(score):
-    return "MediumSeaGreen" if score > 0 else "Tomato"
 
   @property
   def colored_text(self) -> str:
@@ -21,7 +21,7 @@ class ReviewView:
 
     # Color all aspects and bold selected aspect word
     for aspect, score in self.aspects.items():
-      color = self.color(score)
+      color = get_color(score)
       if aspect == self.word:
         text = text.replace(
             " {} ".format(aspect),
