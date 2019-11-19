@@ -47,6 +47,10 @@
 	<script src="{{ url_for('static',filename='js/respond.min.js') }}"></script>
 	<![endif]-->
 
+    <!-- For Plotly plots -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+
 	</head>
 	<body>
 
@@ -71,37 +75,96 @@
 				</div>
 			</div>
 
-			<div class="container">
-				<div class="row">
+			<div class="container" style="width: 95%; center; padding-left: 10%;">
+
+              <div class="column">
 					<div class="col-md-3 animate-box">
 						<article>
-                            <h3>Positive Aspects</h3>
+                            <center><h3>Positive Aspects</h3></center>
                             <table>
                               {% for pos in pos_aspects %}
                                 <tr>
-                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
-                                  <td class="admin"> {{ pos.pos_score }} </td>
+                                  <td class="admin" style="padding-right: 50px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
+                                  <td class="admin" style="padding-right: 15px;"> {{ pos.pos_score }} </td>
+                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{:0.1f}".format(pos.pos_percentage) }}% </font> </td>
+                                  <td class "admin"> <font color="Tomato">{{ "{:0.1f}".format(pos.neg_percentage) }}% </font> </td>
                                 </tr>
                               {% endfor %}
                             </table>
 						</article>
 					</div>
+			</div>
 
+			<div class="column">
 					<div class="col-md-3 animate-box">
 						<article>
-                            <h3>Negative Aspects</h3>
+                            <center><h3>Negative Aspects</h3></center>
                             <table>
                               {% for neg in neg_aspects %}
                                 <tr>
                                   <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ neg.url }}>{{ neg.text }}</a> </td>
-                                  <td class="admin"> {{ neg.neg_score }} </td>
+                                    <td class="admin" style="padding-right: 15px;"> {{ neg.neg_score }} </td>
+                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{:0.1f}".format(neg.pos_percentage) }}% </font> </td>
+                                  <td class "admin"> <font color="Tomato">{{ "{:0.1f}".format(neg.neg_percentage) }}% </font> </td>
                                 </tr>
                               {% endfor %}
                             </table>
 						</article>
 					</div>
 				</div>
-			</div>
+
+                  <div class="column">
+					<div class="col-md-4 animate-box">
+						<article>
+                            <center><h3>Rating Counts</h3></center>
+                            <center><h4>Number of reviews: {{ hotel.n_reviews }}</h4></center>
+                            <div class="chart" id="ratinggraph">
+                                <script>
+                                    var graphs = {{ hotel.rating_counts_piechart | safe }};
+                                    var layout = { <!--xaxis: {title: "Rating", titlefont: {size: 20}, tickfont: {size: 18}},
+                                                   <!--yaxis: {title: "Number of reviews", titlefont: {size: 20}, tickfont: {size: 18}},-->
+                                                   height: 350,
+                                                   margin: {t: 50, b: 30}
+                                                 };
+                                    Plotly.newPlot('ratinggraph', graphs, layout);
+                                </script>
+                            </div>
+						</article>
+					</div>
+
+					<div class="column">
+					<div class="col-md-4 animate-box">
+						<article>
+                            <center><h3>Aspects Sentiment</h3></center>
+                            <div class="chart" id="aspectssentimentpie">
+                                <script>
+                                    var graphs = {{ hotel.aspects_sentiment_piechart | safe }};
+                                    var layout = {height: 350,
+                                                  margin: {t: 50, b: 30}};
+                                    Plotly.newPlot('aspectssentimentpie', graphs, layout);
+                                </script>
+                            </div>
+						</article>
+					</div>
+
+					<div class="col-md-4 animate-box">
+						<article>
+                            <center><h3>Category Ratings</h3></center>
+                            <div class="chart" id="categoriesgraph">
+                                <script>
+                                    var graphs = {{ hotel.additionalrating_barchart | safe }};
+                                    var layout = { xaxis: {title: "Rating", titlefont: {size: 20}, tickfont: {size: 18},
+                                                           tickvals: [0, 1, 2, 3, 4, 5], range: [0, 5]},
+                                                   yaxis: {tickfont: {size: 15}},
+                                                   height: 300,
+                                                   margin: {t: 20, b: 70}
+                                                 };
+                                    Plotly.newPlot('categoriesgraph', graphs, layout);
+                                </script>
+                            </div>
+						</article>
+					</div>
+				</div>
 
 			<div class="copy">
 				<div class="container">
