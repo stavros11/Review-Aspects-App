@@ -85,7 +85,7 @@
                               {% for pos in pos_aspects %}
                                 <tr>
                                   <td class="admin" style="padding-right: 50px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
-                                  <td class="admin" style="padding-right: 15px;"> {{ pos.pos_score }} </td>
+                                  <td class="admin" style="padding-right: 15px;"> {{ pos.score }} </td>
                                   <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{:0.1f}".format(pos.pos_percentage) }}% </font> </td>
                                   <td class "admin"> <font color="Tomato">{{ "{:0.1f}".format(pos.neg_percentage) }}% </font> </td>
                                 </tr>
@@ -103,7 +103,7 @@
                               {% for neg in neg_aspects %}
                                 <tr>
                                   <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ neg.url }}>{{ neg.text }}</a> </td>
-                                    <td class="admin" style="padding-right: 15px;"> {{ neg.neg_score }} </td>
+                                    <td class="admin" style="padding-right: 15px;"> {{ neg.score }} </td>
                                   <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{:0.1f}".format(neg.pos_percentage) }}% </font> </td>
                                   <td class "admin"> <font color="Tomato">{{ "{:0.1f}".format(neg.neg_percentage) }}% </font> </td>
                                 </tr>
