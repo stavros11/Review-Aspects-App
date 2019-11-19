@@ -54,10 +54,11 @@ class Hotel:
   @property
   def n_reviews_aspects_sentiment(self) -> Tuple[int, int, int]:
     aspects_series = self.aspects.aspects_per_review
+    valid_words = self.aspects.container.words
     pos, neutral, neg = 0, 0, 0
     for aspect_counter in aspects_series:
       total_sentiment = sum(v for w, v in aspect_counter.items()
-                            if w in self.aspects.container.words)
+                            if w in valid_words)
       if total_sentiment > 0:
         pos += 1
       elif total_sentiment < 0:
