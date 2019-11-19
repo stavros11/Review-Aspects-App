@@ -32,11 +32,11 @@ class Aspect:
 
   @property
   def pos_percentage(self) -> float:
-    return 100.0 * self.pos_appearances / self.hotel.n_data_reviews
+    return 100.0 * self.pos_appearances / self.hotel.n_reviews
 
   @property
   def neg_percentage(self) -> float:
-    return 100.0 * self.neg_appearances / self.hotel.n_data_reviews
+    return 100.0 * self.neg_appearances / self.hotel.n_reviews
 
   @property
   def neg_appearances(self) -> int:
