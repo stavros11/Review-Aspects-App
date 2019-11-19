@@ -1,6 +1,5 @@
 import flask
-import pandas as pd
-from application import hotel
+from app_tools import hotel
 from aspects import containers
 
 
@@ -43,7 +42,8 @@ class Aspect:
 
   @property
   def url(self) -> str:
-    return flask.url_for("main", hotelname=self.hotel.id, word=self.text)
+    word_mode = "__".join([self.text, self.mode])
+    return flask.url_for("main", hotelname=self.hotel.id, word=word_mode)
 
 
 def aspects_generator(container: containers.AspectContainers,
@@ -53,34 +53,3 @@ def aspects_generator(container: containers.AspectContainers,
   counter = getattr(container, mode)
   for word, _ in counter.most_common()[start: end]:
     yield Aspect(word, hotel, container, mode=mode)
-
-
-class ReviewView:
-
-  def __init__(self, data: pd.Series, word: str):
-    self.word = word
-    for k, v in data.items():
-      setattr(self, k, v)
-
-  @staticmethod
-  def color(score):
-    return "MediumSeaGreen" if score > 0 else "Tomato"
-
-  @property
-  def colored_text(self) -> str:
-    # Fix new lines for HTML
-    text = self.text.replace("\n", "<br>")
-
-    # Color all aspects and bold selected aspect word
-    for aspect, score in self.aspects.items():
-      color = self.color(score)
-      if aspect == self.word:
-        text = text.replace(
-            " {} ".format(aspect),
-            " <b><font color='{}'>{}</font></b> ".format(color, aspect))
-      else:
-        text = text.replace(
-            " {} ".format(aspect),
-            " <font color='{}'>{}</font> ".format(color, aspect))
-
-    return text

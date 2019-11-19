@@ -1,7 +1,7 @@
 import os
 import json
 import flask
-from application import directories
+from app_tools import directories
 from aspects import containers
 
 import plotly
