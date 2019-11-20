@@ -1,6 +1,7 @@
 import os
 import json
 import flask
+import numpy as np
 import pandas as pd
 from app_tools import directories
 from aspects import containers
@@ -26,8 +27,10 @@ class Hotel:
     for k, v in hotel_data.items():
       setattr(self, k, v)
 
-    self.aspects = containers.DataAspects.load(
-        os.path.join(self.hotel_dir, self.pkl_name))
+    load_dir = os.path.join(self.hotel_dir, self.pkl_name)
+    self.aspects = containers.DataAspects.load(load_dir)
+    # Quick load of npy files with categorical appearances
+    self.category_appearances = np.load("{}_cat_appearances.npy".format(load_dir))
 
   @staticmethod
   def find_txt(data_dir: str):
@@ -76,8 +79,8 @@ class Hotel:
     return neg, neutral, pos
 
   @staticmethod
-  def encode_plot(plot):
-    return json.dumps([plot], cls=plotly.utils.PlotlyJSONEncoder)
+  def encode_plot(*plot):
+    return json.dumps(list(plot), cls=plotly.utils.PlotlyJSONEncoder)
 
   _PIE_COLORS = ["rgb(227,26,28)", "rgb(251,154,153)", "rgb(166,206,227)",
                  "rgb(129,218,85)", "rgb(51,160,44)"]
@@ -123,5 +126,14 @@ class Hotel:
     for category, rating in self.additionalRatings.items():
       categories.append(category)
       ratings.append(rating)
-    radar = go.Bar(y=categories, x=ratings, orientation="h", width=0.3)
-    return self.encode_plot(radar)
+    bar = go.Bar(y=categories, x=ratings, orientation="h", width=0.3)
+    return self.encode_plot(bar)
+
+  @property
+  def categoryapperances_barchart(self):
+    categories = ["Location", "Cleanliness", "Service", "Value"]
+    pos_apps = self.category_appearances[:, 0]
+    neg_apps = self.category_appearances[:, 1]
+    bar1 = go.Bar(name="Positive", y=categories, x=pos_apps, orientation="h", width=0.3)
+    bar2 = go.Bar(name="Negative", y=categories, x=neg_apps, orientation="h", width=0.3)
+    return self.encode_plot(bar1, bar2)

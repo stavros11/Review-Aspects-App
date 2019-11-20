@@ -1,7 +1,7 @@
 import pandas as pd
 from app_tools import hotel
 from aspects import containers
-
+from typing import Set
 
 def get_color(score: float):
   return ["Tomato", "MediumSeaGreen"][score > 0]
@@ -9,8 +9,9 @@ def get_color(score: float):
 
 class ReviewView:
 
-  def __init__(self, data: pd.Series, word: str):
+  def __init__(self, data: pd.Series, word: str, valid_words: Set[str]):
     self.word = word
+    self.valid_words = valid_words
     for k, v in data.items():
       setattr(self, k, v)
 
@@ -26,7 +27,7 @@ class ReviewView:
         text = text.replace(
             "{}".format(aspect),
             "<b><font color='{}'>{}</font></b>".format(color, aspect))
-      else:
+      elif aspect in self.valid_words:
         text = text.replace(
             "{}".format(aspect),
             "<font color='{}'>{}</font>".format(color, aspect))
@@ -39,8 +40,9 @@ def reviews_generator(word: str,
                       hotel: hotel.Hotel,
                       mode: str = "pos_scores") -> ReviewView:
   sign = {"pos_scores": 1, "neg_scores": -1}[mode]
+  valid_words = container.words
   for i in container.map[word].keys():
     review = hotel.aspects.data.iloc[i]
     # assert word in review.aspects
     if review.aspects[word] * sign > 0:
-      yield ReviewView(review, word)
+      yield ReviewView(review, word, valid_words)
