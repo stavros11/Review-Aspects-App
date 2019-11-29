@@ -8,29 +8,53 @@ from aspects import containers
 import plotly
 from plotly import graph_objects as go
 
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 
 class Hotel:
 
-  def __init__(self, folder_name: str, pkl_name: Optional[str] = None):
-    self.id = folder_name
-    if pkl_name is None:
-      self.pkl_name = directories.hotel_db[folder_name]
-    else:
-      self.pkl_name = pkl_name
-
-    self.hotel_dir = os.path.join(directories.trip_advisor, self.id)
-    with open(self.find_txt(self.hotel_dir), "r") as file:
-      hotel_data = json.load(file)
+  def __init__(self, id: str,
+               aspects: containers.DataAspects,
+               hotel_data: Optional[Dict[str, Any]] = None,
+               load_name: Optional[str] = None):
+    self.id = id
+    self.aspects = aspects
+    self.load_name = load_name
     for k, v in hotel_data.items():
       setattr(self, k, v)
 
-    load_dir = os.path.join(self.hotel_dir, self.pkl_name)
-    self.aspects = containers.DataAspects.load(load_dir)
+  @classmethod
+  def load_from_local(cls, folder_name: str, pkl_name: Optional[str] = None
+                      ) -> "Hotel":
+    """Loads a hotel using a file (pickle) from local disk."""
+    if pkl_name is None:
+      pkl_name = directories.hotel_db[folder_name]
+    else:
+      pkl_name = pkl_name
+
+    hotel_dir = os.path.join(directories.trip_advisor, folder_name)
+    with open(cls.find_txt(hotel_dir), "r") as file:
+      hotel_data = json.load(file)
+
+    aspects_dir = os.path.join(hotel_dir, pkl_name)
+    aspects = containers.DataAspects.load(aspects_dir)
+
+    return cls(folder_name, aspects, hotel_data, load_name=pkl_name)
 
   @staticmethod
   def find_txt(data_dir: str):
+    """Finds all `txt` files in the given directory.
+
+    Args:
+      data_dir: The directory path to search for `txt`.
+
+    Returns:
+      The full path of the found `text`.
+
+    Raises:
+      FileExistsError if more than one `txt`s are found in the given path.
+      FileNotFoundError if no `txt`s exist in the given.
+    """
     all_files = os.listdir(data_dir)
     txt = None
     for file in all_files:
@@ -38,17 +62,19 @@ class Hotel:
         if txt is None:
           txt = file
         else:
-          raise ValueError("Multiple .txt files found in {}.".format(data_dir))
+          raise FileExistsError("Multiple .txt files found in {}.".format(data_dir))
     if txt is None:
-      raise ValueError("Could not find .txt file in {}.".format(data_dir))
+      raise FileNotFoundError("Could not find .txt file in {}.".format(data_dir))
     return os.path.join(data_dir, txt)
 
   @property
   def app_url(self):
+    """URL that redirects back to the hotel's main page."""
     return flask.url_for("main", hotelname=self.id)
 
   @property
   def n_reviews(self) -> int:
+    """Total number of reviews available for this hotel."""
     return len(self.aspects.data)
 
   @property
