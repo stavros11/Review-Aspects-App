@@ -63,7 +63,7 @@
 					<div class="container">
 						<div class="col-md-12 col-md-offset-0">
 							<div class="animate-box">
-							<h2>Reviews with aspect: <font color= {{ title_color }} ><b>{{ word }}</font></b> </h2>
+							<h2>Reviews with aspect: <font color= {{ "MediumSeaGreen" if mode == "pos" else "Tomato" }} ><b>{{ word }}</font></b> </h2>
 							<p class="breadcrumbs"><span><a href={{ hotel.app_url }}>Back to {{ hotel.name }} </a></span>
 							</div>
 						</div>
@@ -72,7 +72,7 @@
 			</div>
 
 			<div class="container">
-                 {% for review in reviews %}
+                 {% for review in hotel.aspects.known_words[word].get_reviews(mode) %}
 				<div class="row">
 					<div class="col-md-20 animate-box">
 						<article>

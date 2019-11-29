@@ -1,6 +1,6 @@
 import collections
 import pandas as pd
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Set, Union
 
 
 class AspectWord:
@@ -33,10 +33,6 @@ class AspectWord:
           review, self))
     self.reviews[review] = score
 
-  def url(self, positive: bool = True) -> str:
-    # TODO: Implement this
-    return ""
-
   @property
   def text(self) -> str:
     return str(self)
@@ -53,6 +49,12 @@ class AspectWord:
   def score(self) -> float:
     return sum(self.reviews.values())
 
+  def get_reviews(self, mode: str = "pos") -> "Review":
+    sign = 1 if mode == "pos" else - 1
+    for review, score in self.reviews.items():
+      if sign * score > 0:
+        yield review
+
 
 class Review:
   """Data structure for a REVIEW.
@@ -64,10 +66,11 @@ class Review:
     * self.index: The index of the REVIEW in the hotel DataFrame.
   """
 
-  def __init__(self, text: str, index: Optional[int] = None):
+  def __init__(self, text: str, meta: Dict[str, Any]):
     self._text = text
-    self.index = index
     self.aspects = collections.Counter({})
+    for k, v in meta.items():
+      setattr(self, k, v)
 
   def __str__(self):
     return self._text
@@ -82,9 +85,17 @@ class Review:
     self.aspects[word] = score
 
   @property
-  def score(self):
+  def score(self) -> float:
     return sum(self.aspects.values())
 
+  @property
+  def colored_text(self) -> str:
+    # TODO: Implement this properly.
+    return str(self)
+
+
+_DEFAULT_REVIEW_META = {"absoluteUrl", "title", "publishedDate", "rating",
+                        "helpfulVotes", "username", "user_hometownName"}
 
 class AspectsCollection:
   """Data structure that handles `AspectWord` and `Review` collections.
@@ -95,17 +106,23 @@ class AspectsCollection:
     * aspects_scores: Dict from `AspectWord` to its corresponding score.
   """
 
-  def __init__(self, reviews: pd.Series, aspects: pd.Series):
+  def __init__(self, data: pd.DataFrame,
+               text_col_name: str = "text",
+               aspect_col_name: str = "aspects",
+               review_meta: Set[str] = _DEFAULT_REVIEW_META):
     self.reviews = []
 
     self.known_words = {} # Dict[str, WordAspect]
     self.aspects_scores = collections.Counter({}) # Counter[WordAspect, float]
 
-    for i, (review_text, aspect_counter) in enumerate(zip(reviews, aspects)):
+    iterator = zip(data[text_col_name], data[aspect_col_name])
+    for i, (review_text, aspect_counter) in enumerate(iterator):
       if aspect_counter is None:
         continue
 
-      review = Review(review_text, i)
+      meta = {k: data.iloc[i][k] for k in review_meta}
+      meta["index"] = i
+      review = Review(review_text, meta)
       self.reviews.append(review)
 
       for word, score in aspect_counter.items():

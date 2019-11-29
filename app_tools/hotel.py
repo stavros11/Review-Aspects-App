@@ -7,7 +7,7 @@ from app_tools import directories, containers
 import plotly
 from plotly import graph_objects as go
 
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 
 class Hotel:
@@ -33,8 +33,7 @@ class Hotel:
                load_name: Optional[str] = None):
     self.id = id
     self.data = review_data
-    self.aspects = containers.AspectsCollection(
-        review_data.text, review_data.aspects)
+    self.aspects = containers.AspectsCollection(review_data)
 
     self.load_name = load_name
     if hotel_data is not None:

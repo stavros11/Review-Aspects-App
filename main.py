@@ -15,27 +15,19 @@ def hotels_page():
 def analysis_page(hotelname: str, word: Optional[str] = None):
   # hotelname is the name of the folder that contains all hotel files
   hotel = tools.hotel.Hotel.load_from_local(hotelname)
+  # TODO: Implement word merging
 
-  # optionally use word2vec to merge words
-  #hotel.aspects.merge(cut_off=0.4)
-  #container = hotel.aspects.merged_container
-  # alternatively:
-  #container = hotel.aspects.container
-
-  #if word is not None:
-  #  return view_reviews_page(word, hotel, container)
+  if word is not None:
+    return view_reviews_page(word, hotel)
 
   return flask.render_template("aspects.html", hotel=hotel, n_aspects=58)
 
 
-#def view_reviews_page(word_mode: str,
-#                      hotel: tools.hotel.Hotel,
-#                      container: containers.AspectContainers):
-#  word, mode = word_mode.split("__")
-#  color = tools.reviews.get_color(int(mode == "pos_scores")) # title color
-#  reviews = tools.reviews.reviews_generator(word, container, hotel, mode)
-#  return flask.render_template("reviews.html", reviews=reviews, word=word,
-#                               hotel=hotel, title_color=color)
+def view_reviews_page(word_mode: str,
+                      hotel: tools.hotel.Hotel):
+  word, mode = word_mode.split("__")
+  return flask.render_template("reviews.html", hotel=hotel,
+                               word=word, mode=mode)
 
 
 @app.route("/<hotelname>?word=<word>")
