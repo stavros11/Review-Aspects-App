@@ -81,8 +81,19 @@ class Review:
           word, self))
     self.aspects[word] = score
 
+  @property
+  def score(self):
+    return sum(self.aspects.values())
+
 
 class AspectsCollection:
+  """Data structure that handles `AspectWord` and `Review` collections.
+
+  Contains:
+    * self.reviews: List of `Review` with the ordering of the DataFrame.
+    * known_words: Dict from words (str) to the corresponding `AspectWord`.
+    * aspects_scores: Dict from `AspectWord` to its corresponding score.
+  """
 
   def __init__(self, reviews: pd.Series, aspects: pd.Series):
     self.reviews = []
@@ -119,9 +130,21 @@ class AspectsCollection:
     return [w for w, _ in score_counter.most_common()]
 
   @property
+  def n_reviews(self):
+    return len(self.reviews)
+
+  @property
   def most_common_positive(self) -> List[AspectWord]:
     return self.most_common(invert_sign=False)
 
   @property
   def most_common_negative(self) -> List[AspectWord]:
     return self.most_common(invert_sign=True)
+
+  @property
+  def n_reviews_aspects_sentiment(self) -> List[int]:
+    """Calculates the number of reviews with neg/neutral/pos total score."""
+    pos = sum(review.score > 0 for review in self.reviews)
+    neutral = sum(review.score == 0 for review in self.reviews)
+    neg = sum(review.score < 0 for review in self.reviews)
+    return [neg, neutral, pos]
