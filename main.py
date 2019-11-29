@@ -26,8 +26,9 @@ def analysis_page(hotelname: str, word: Optional[str] = None):
 def view_reviews_page(word_mode: str,
                       hotel: tools.hotel.Hotel):
   word, mode = word_mode.split("__")
+  color = tools.containers.get_color(mode == "pos")
   return flask.render_template("reviews.html", hotel=hotel,
-                               word=word, mode=mode)
+                               word=word, mode=mode, color=color)
 
 
 @app.route("/<hotelname>?word=<word>")

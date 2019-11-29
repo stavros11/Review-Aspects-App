@@ -3,6 +3,10 @@ import pandas as pd
 from typing import List, Optional, Union
 
 
+def get_color(positive: bool = True) -> str:
+  return "MediumSeaGreen" if positive else "Tomato"
+
+
 class AspectWord:
   """Data structure for an aspect WORD.
 
@@ -89,43 +93,22 @@ class Review:
   def score(self) -> float:
     return sum(self.aspects.values())
 
-  @property
-  def colored_text(self) -> str:
-    # TODO: Implement this properly.
-    return str(self)
+  def colored_text(self, word: str) -> str:
+    # TODO: Fix bugs with coloring
+    text = str(self).replace("\n", "<br>")
+    # Color all aspects and bold selected aspect word
+    for aspect, score in self.aspects.items():
+      color = get_color(score > 0)
+      if str(aspect) == word:
+        text = text.replace(
+            "{}".format(aspect),
+            "<b><font color='{}'>{}</font></b>".format(color, aspect))
+      else:
+        text = text.replace(
+            "{}".format(aspect),
+            "<font color='{}'>{}</font>".format(color, aspect))
+    return text
 
-  @property
-  def absoluteUrl(self):
-    return self.data["absoluteUrl"]
-
-  @property
-  def title(self):
-    return self.data["title"]
-
-  @property
-  def publishedDate(self):
-    return self.data["publishedDate"]
-
-  @property
-  def rating(self):
-    return self.data["rating"]
-
-  @property
-  def helpfulVotes(self):
-    return self.data["helpfulVotes"]
-
-  @property
-  def username(self):
-    return self.data["username"]
-
-  @property
-  def user_hometownName(self):
-    return self.data["user_hometownName"]
-
-
-# TODO: Remove this set (deprecated)
-_DEFAULT_REVIEW_META = {"absoluteUrl", "title", "publishedDate", "rating",
-                        "helpfulVotes", "username", "user_hometownName"}
 
 class AspectsCollection:
   """Data structure that handles `AspectWord` and `Review` collections.
