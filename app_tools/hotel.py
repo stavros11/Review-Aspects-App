@@ -103,6 +103,7 @@ class Hotel:
 
   @property
   def n_reviews_aspects_sentiment(self) -> Tuple[int, int, int]:
+    # TODO: Remove this if not needed
     aspects_series = self.aspects.aspects_per_review
     valid_words = self.aspects.container.words
     pos, neutral, neg = 0, 0, 0
@@ -119,6 +120,7 @@ class Hotel:
 
   @property
   def n_reviews_hasnegative(self) -> Tuple[int, int]:
+    # TODO: Remove this if not needed
     sentiment = self.aspects.has_negative
     neg = (sentiment == "Negative").sum()
     pos = (sentiment == "Positive").sum()
