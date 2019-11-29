@@ -1,18 +1,20 @@
 import collections
 import os
 import time
+from app_tools import directories
 from spacy import tokens
 from typing import Iterable, List, Set
 
 
-def load_words(lexicon_dir: str) -> Set[str]:
+def load_words(filename: str) -> Set[str]:
     """Loads opinion word from txt file to set."""
-    file = open(os.path.join(lexicon_dir), encoding="ISO-8859-1")
+    file = open(os.path.join(directories.opinion_lexicon, filename),
+                encoding="ISO-8859-1")
     return set(line.strip() for line in file.readlines())
 
-_LEXICON_DIR = "/home/stavros/GitHub/Text-Classification/opinion-lexicon"
-_POS_WORDS = load_words(os.path.join(_LEXICON_DIR, "pos_words.txt"))
-_NEG_WORDS = load_words(os.path.join(_LEXICON_DIR, "neg_words.txt"))
+
+_POS_WORDS = load_words("pos_words.txt")
+_NEG_WORDS = load_words("neg_words.txt")
 _OPINION_WORDS = _POS_WORDS | _NEG_WORDS
 
 

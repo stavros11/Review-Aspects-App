@@ -1,8 +1,17 @@
 """Hardcoded directories to import when needed."""
+import os
 
-airbnb = "/home/stavros/DATA/AirbnbReviews"
-trip_advisor = "/home/stavros/DATA/TripAdvisorReviews"
-google_word2vec = "/home/stavros/DATA/GoogleNews-vectors-negative300.bin.gz"
+#base = "/home/stavros/DATA"
+base = "D:/"
+
+#opinion_lexicon = "/home/stavros/GitHub/Text-Classification/opinion-lexicon"
+opinion_lexicon = "C:/Users/SU/Documents/GitHub/Text-Classification"
+
+
+airbnb = os.path.join(base, "AirbnbReviews")
+trip_advisor = os.path.join(base, "TripAdvisorReviews")
+google_word2vec = os.path.join(base, "GoogleNews-vectors-negative300.bin.gz")
+
 
 hotel_order = ["rodos_palace", "sentido_ixian_grand", "kresten_royal", "titania_hotel"]#, "lindian_village"
 
