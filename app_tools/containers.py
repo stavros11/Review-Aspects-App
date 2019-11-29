@@ -43,15 +43,15 @@ class AspectWord:
 
   @property
   def positive_appearances(self) -> int:
-    return sum(score > 0 for _, score in self.reviews)
+    return sum(score > 0 for score in self.reviews.values())
 
   @property
   def negative_appearances(self) -> int:
-    return sum(score < 0 for _, score in self.reviews)
+    return sum(score < 0 for score in self.reviews.values())
 
   @property
   def score(self) -> float:
-    return sum(score for _, score in self.reviews)
+    return sum(self.reviews.values())
 
 
 class Review:
@@ -90,21 +90,24 @@ class AspectsCollection:
     self.known_words = {} # Dict[str, WordAspect]
     self.aspects_scores = collections.Counter({}) # Counter[WordAspect, float]
 
-    for i, (rev, asp) in enumerate(zip(reviews, aspects)):
-      if asp is None:
+    for i, (review_text, aspect_counter) in enumerate(zip(reviews, aspects)):
+      if aspect_counter is None:
         continue
 
-      self.reviews.append(Review(rev, i))
-      for word, score in asp.items():
-        if word in self.known_words:
-          aspect_word = self.known_words[word]
-        else:
-          aspect_word = AspectWord(word)
-          self.known_words[word] = aspect_word
+      review = Review(review_text, i)
+      self.reviews.append(review)
 
-        self.aspects_scores[aspect_word] += score
-        aspect_word.add_review(rev, score)
-        self.reviews[-1].add_aspectword(aspect_word, score)
+      for word, score in aspect_counter.items():
+        if word in self.known_words:
+          aspect = self.known_words[word]
+        else:
+          aspect = AspectWord(word)
+          self.known_words[word] = aspect
+
+        self.aspects_scores[aspect] += score
+
+        aspect.add_review(review, score)
+        review.add_aspectword(aspect, score)
 
   def most_common(self, invert_sign: bool = False) -> List[AspectWord]:
     if invert_sign:

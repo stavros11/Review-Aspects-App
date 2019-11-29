@@ -48,9 +48,15 @@ class Hotel:
     if file_name is None:
       file_name = directories.hotel_db[folder_name]
 
+    # Find file type
+    if len(file_name.split(".")) > 1:
+      file_type = file_name.split(".")[-1]
+    else: # default type is pkl
+      file_type = "pkl"
+      file_name = ".".join([file_name, file_type])
+
     # Load DataFrame
     hotel_dir = os.path.join(directories.trip_advisor, folder_name)
-    _, file_type = file_name.split(".")
     if file_type == "csv":
       review_data = pd.read_csv(os.path.join(hotel_dir, file_name))
     elif file_type == "pkl":
@@ -154,6 +160,7 @@ class Hotel:
 
   @property
   def aspects_hasnegative_piechart(self):
+    """NOT USED"""
     labels = ["Negative", "Neutral", "Positive"]
     colors = [self._PIE_COLORS[0], self._PIE_COLORS[2], self._PIE_COLORS[-1]]
     pie = go.Pie(labels=labels, values=list(self.n_reviews_hasnegative),
@@ -162,6 +169,7 @@ class Hotel:
 
   @property
   def additionalrating_radarchart(self):
+    """NOT USED"""
     categories, ratings = [], []
     for category, rating in self.additionalRatings.items():
       categories.append(category)
