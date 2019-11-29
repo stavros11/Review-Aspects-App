@@ -84,7 +84,7 @@
                             <table>
                               {% for pos in hotel.aspects.most_common_positive[:n_aspects] %}
                                 <tr>
-                                  <td class="admin" style="padding-right: 50px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
+                                  <td class="admin" style="padding-right: 50px;"> <a href= {{ url_for("main", hotelname=hotel.id, word="{}__pos".format(pos.text)) }}>{{ pos.text }}</a> </td>
                                   <td class="admin" style="padding-right: 15px;"> {{ pos.score }} </td>
                                   <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{}".format(pos.positive_appearances) }} </font> </td>
                                   <td class "admin"> <font color="Tomato">{{ "{}".format(pos.negative_appearances) }} </font> </td>
@@ -102,7 +102,7 @@
                             <table>
                               {% for neg in hotel.aspects.most_common_negative[:n_aspects] %}
                                 <tr>
-                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ neg.url }}>{{ neg.text }}</a> </td>
+                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ url_for("main", hotelname=hotel.id, word="{}__neg".format(neg.text)) }}>{{ neg.text }}</a> </td>
                                     <td class="admin" style="padding-right: 15px;"> {{ neg.score }} </td>
                                   <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{}".format(neg.positive_appearances) }} </font> </td>
                                   <td class "admin"> <font color="Tomato">{{ "{}".format(neg.negative_appearances) }} </font> </td>
