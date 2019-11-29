@@ -1,6 +1,6 @@
 import collections
 import pandas as pd
-from typing import Any, Dict, List, Set, Union
+from typing import List, Optional, Union
 
 
 class AspectWord:
@@ -65,12 +65,13 @@ class Review:
       in REVIEW mapped to their scores.
     * self.index: The index of the REVIEW in the hotel DataFrame.
   """
+  # FIXME: Update docstring for data (Series)
 
-  def __init__(self, text: str, meta: Dict[str, Any]):
+  def __init__(self, text: str, data: Optional[pd.Series] = None):
     self._text = text
     self.aspects = collections.Counter({})
-    for k, v in meta.items():
-      setattr(self, k, v)
+
+    self.data = data
 
   def __str__(self):
     return self._text
@@ -93,7 +94,36 @@ class Review:
     # TODO: Implement this properly.
     return str(self)
 
+  @property
+  def absoluteUrl(self):
+    return self.data["absoluteUrl"]
 
+  @property
+  def title(self):
+    return self.data["title"]
+
+  @property
+  def publishedDate(self):
+    return self.data["publishedDate"]
+
+  @property
+  def rating(self):
+    return self.data["rating"]
+
+  @property
+  def helpfulVotes(self):
+    return self.data["helpfulVotes"]
+
+  @property
+  def username(self):
+    return self.data["username"]
+
+  @property
+  def user_hometownName(self):
+    return self.data["user_hometownName"]
+
+
+# TODO: Remove this set (deprecated)
 _DEFAULT_REVIEW_META = {"absoluteUrl", "title", "publishedDate", "rating",
                         "helpfulVotes", "username", "user_hometownName"}
 
@@ -108,8 +138,7 @@ class AspectsCollection:
 
   def __init__(self, data: pd.DataFrame,
                text_col_name: str = "text",
-               aspect_col_name: str = "aspects",
-               review_meta: Set[str] = _DEFAULT_REVIEW_META):
+               aspect_col_name: str = "aspects"):
     self.reviews = []
 
     self.known_words = {} # Dict[str, WordAspect]
@@ -120,9 +149,7 @@ class AspectsCollection:
       if aspect_counter is None:
         continue
 
-      meta = {k: data.iloc[i][k] for k in review_meta}
-      meta["index"] = i
-      review = Review(review_text, meta)
+      review = Review(review_text, data=data.iloc[i])
       self.reviews.append(review)
 
       for word, score in aspect_counter.items():
