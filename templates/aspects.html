@@ -165,23 +165,6 @@
 						</article>
 					</div>
 
-					<div class="col-md-4 animate-box">
-						<article>
-                            <center><h3>Categorized Aspects Appearance</h3></center>
-                            <div class="chart" id="appsgraph">
-                                <script>
-                                    var graphs = {{ hotel.categoryapperances_barchart | safe }};
-                                    var layout = { xaxis: {title: "Score", titlefont: {size: 20}, tickfont: {size: 18}},
-                                                   yaxis: {tickfont: {size: 15}},
-                                                   height: 300,
-                                                   margin: {t: 20, b: 70}
-                                                 };
-                                    Plotly.newPlot('appsgraph', graphs, layout);
-                                </script>
-                            </div>
-						</article>
-					</div>
-
 				</div>
 
 			<div class="copy">
