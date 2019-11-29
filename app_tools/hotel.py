@@ -2,8 +2,7 @@ import os
 import json
 import flask
 import pandas as pd
-from app_tools import directories
-from aspects import containers
+from app_tools import directories, containers
 
 import plotly
 from plotly import graph_objects as go
@@ -12,34 +11,59 @@ from typing import Any, Dict, Optional, Tuple
 
 
 class Hotel:
+  """Data structure for a specific Hotel.
+
+  Contains:
+    * self.id: An identifier for this particular hotel (id). This is also used
+      in the URL of the main hotel page.
+    * self.data: DataFrame with all the hotel reviews and the identified aspects.
+    * self.aspects: An `AspectsCollection` container for manipulation of aspect
+      words.
+
+    Optionally:
+      * self.load_name: Name of the pkl/csv file that we used to load the
+      review DataFrame.
+      * self.{} for all {} that are contained in the hotel json txt.
+  """
+  # FIXME: Update aspects usage
 
   def __init__(self, id: str,
-               aspects: containers.DataAspects,
+               review_data: pd.DataFrame,
                hotel_data: Optional[Dict[str, Any]] = None,
                load_name: Optional[str] = None):
     self.id = id
-    self.aspects = aspects
+    self.data = review_data
+    self.aspects = containers.AspectsCollection(
+        review_data.text, review_data.aspects)
+
     self.load_name = load_name
-    for k, v in hotel_data.items():
-      setattr(self, k, v)
+    if hotel_data is not None:
+      for k, v in hotel_data.items():
+        setattr(self, k, v)
 
   @classmethod
-  def load_from_local(cls, folder_name: str, pkl_name: Optional[str] = None
+  def load_from_local(cls, folder_name: str, file_name: Optional[str] = None
                       ) -> "Hotel":
     """Loads a hotel using a file (pickle) from local disk."""
-    if pkl_name is None:
-      pkl_name = directories.hotel_db[folder_name]
-    else:
-      pkl_name = pkl_name
+    if file_name is None:
+      file_name = directories.hotel_db[folder_name]
 
+    # Load DataFrame
     hotel_dir = os.path.join(directories.trip_advisor, folder_name)
+    _, file_type = file_name.split(".")
+    if file_type == "csv":
+      review_data = pd.read_csv(os.path.join(hotel_dir, file_name))
+    elif file_type == "pkl":
+      review_data = pd.read_pickle(os.path.join(hotel_dir, file_name))
+    else:
+      raise NotImplementedError("File type {} is not supported.".format(
+          file_type))
+
+    # Load hotel metadata (star ratings, etc.)
     with open(cls.find_txt(hotel_dir), "r") as file:
       hotel_data = json.load(file)
 
-    aspects_dir = os.path.join(hotel_dir, pkl_name)
-    aspects = containers.DataAspects.load(aspects_dir)
-
-    return cls(folder_name, aspects, hotel_data, load_name=pkl_name)
+    return cls(folder_name, review_data, hotel_data, load_name=file_name)
 
   @staticmethod
   def find_txt(data_dir: str):
@@ -75,7 +99,7 @@ class Hotel:
   @property
   def n_reviews(self) -> int:
     """Total number of reviews available for this hotel."""
-    return len(self.aspects.data)
+    return len(self.data)
 
   @property
   def n_reviews_aspects_sentiment(self) -> Tuple[int, int, int]:
@@ -111,7 +135,7 @@ class Hotel:
   @property
   def rating_counts_piechart(self):
     labels, values = [], []
-    for l, v in pd.value_counts(self.aspects.data.rating).items():
+    for l, v in pd.value_counts(self.data.rating).items():
       labels.append(l)
       values.append(v)
     pie = go.Pie(labels=labels, values=values,
