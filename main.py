@@ -1,5 +1,6 @@
 import flask
 import app_tools as tools
+# TODO: Rename app_tools folder to tools
 from typing import Optional
 
 
