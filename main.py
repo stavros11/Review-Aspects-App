@@ -5,6 +5,7 @@ from typing import Optional
 
 
 app = flask.Flask(__name__)
+storage_path = "D:/TripAdvisorReviews/app_storage"
 
 
 def view_reviews(word_mode: str, hotel: tools.hotel.Hotel):
@@ -25,7 +26,8 @@ def analysis_from_upload(filename):
 def analysis(hotelname: str, word: Optional[str] = None):
   """Generates the analysis page (with aspects and visualizations)."""
   # hotelname is the name of the folder that contains all hotel files
-  hotel = tools.hotel.Hotel.load_from_local(hotelname)
+  hotel_path = os.path.join(storage_path, hotelname)
+  hotel = tools.hotel.Hotel.load_from_folder(hotel_path)
   # TODO: Implement word merging
   if word is not None:
     return view_reviews(word, hotel)
@@ -41,8 +43,12 @@ def main():
     file.save(os.path.join(tools.directories.upload_path, file.filename))
     return analysis_from_upload(file.filename)
 
-  hotels = [tools.hotel.Hotel.load_from_local(k)
-            for k in tools.directories.hotel_order]
+  hotels = []
+  for file in os.listdir(storage_path):
+    full_path = os.path.join(storage_path, file)
+    if os.path.isdir(full_path):
+      hotels.append(tools.hotel.Hotel.load_from_folder(full_path))
+
   return flask.render_template("hotels.html", hotels=hotels)
 
 

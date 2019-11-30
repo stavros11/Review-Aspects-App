@@ -1,13 +1,35 @@
 import os
 import json
 import flask
+import zipfile
 import pandas as pd
-from tools import directories, containers
+from tools import containers
 
 import plotly
 from plotly import graph_objects as go
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
+
+
+def find_files_of_type(folder_path: str, target_type: str = "txt") -> List[str]:
+  """Finds all files of a specific type in the given directory.
+
+    Args:
+      folder_path: The directory path to search for files.
+      target_type: The type of files to find (eg. txt, pkl, csv, etc.)
+
+    Returns:
+      The full path of all files with the required type
+  """
+  all_files = os.listdir(folder_path)
+  found_files = []
+  for file in all_files:
+    if len(file.split(".")) > 2:
+      raise NameError("Cannot identify type of {}.".format(file))
+    if file.split(".")[-1] == target_type:
+      found_files.append(os.path.join(folder_path, file))
+
+  return found_files
 
 
 class Hotel:
@@ -21,85 +43,64 @@ class Hotel:
       words.
 
     Optionally:
-      * self.load_name: Name of the pkl/csv file that we used to load the
-      review DataFrame.
       * self.{} for all {} that are contained in the hotel json txt.
   """
-  # FIXME: Update aspects usage
 
-  def __init__(self, id: str,
-               review_data: pd.DataFrame,
-               hotel_data: Optional[Dict[str, Any]] = None,
-               load_name: Optional[str] = None):
-    self.id = id
+  def __init__(self, metadata: Dict[str, Any], review_data: pd.DataFrame):
+    if "id" not in metadata:
+      raise KeyError("Unable to find hotel id in hotel meta data file.")
+    for k, v in metadata.items():
+        setattr(self, k, v)
+
     self.data = review_data
     self.aspects = containers.AspectsCollection(review_data)
 
-    self.load_name = load_name
-    if hotel_data is not None:
-      for k, v in hotel_data.items():
-        setattr(self, k, v)
-
   @classmethod
-  def load_from_local(cls, folder_name: str, file_name: Optional[str] = None
-                      ) -> "Hotel":
-    """Loads a hotel using a file (pickle) from local disk."""
-    if file_name is None:
-      file_name = directories.hotel_db[folder_name]
-
-    # Find file type
-    if len(file_name.split(".")) > 1:
-      file_type = file_name.split(".")[-1]
-    else: # default type is pkl
-      file_type = "pkl"
-      file_name = ".".join([file_name, file_type])
-
-    # Load DataFrame
-    hotel_dir = os.path.join(directories.trip_advisor, folder_name)
-    if file_type == "csv":
-      review_data = pd.read_csv(os.path.join(hotel_dir, file_name))
-    elif file_type == "pkl":
-      review_data = pd.read_pickle(os.path.join(hotel_dir, file_name))
-    else:
-      raise NotImplementedError("File type {} is not supported.".format(
-          file_type))
+  def load_from_folder(cls, folder: str) -> "Hotel":
+    if not os.path.isdir(folder):
+      raise FileNotFoundError("Unable to find directory {}.".format(folder))
 
     # Load hotel metadata (star ratings, etc.)
-    with open(cls.find_txt(hotel_dir), "r") as file:
-      hotel_data = json.load(file)
+    metafile_dir = find_files_of_type(folder, target_type="txt")
+    if len(metafile_dir) > 1:
+      raise FileExistsError("Multiple txt files found in {}.".format(folder))
+    elif len(metafile_dir) == 0:
+      raise FileNotFoundError("Unable to find txt file in {}.".format(folder))
+    with open(metafile_dir[0], "r") as file:
+      metadata = json.load(file)
 
-    return cls(folder_name, review_data, hotel_data, load_name=file_name)
+    # Load DataFrame from csv/pkl
+    pkl_files = find_files_of_type(folder, target_type="pkl")
+    csv_files = find_files_of_type(folder, target_type="csv")
+    if len(csv_files) + len(pkl_files) > 1:
+      raise FileExistsError("Multiple data files found in {}.".format(folder))
+    elif len(csv_files) + len(pkl_files) == 0:
+      raise FileNotFoundError("Unable to data file in {}.".format(folder))
+
+    if len(pkl_files) > 0:
+      review_data = pd.read_pickle(pkl_files[0])
+    else:
+      review_data = pd.read_csv(csv_files[0])
+
+    # If the key `id` is not found in metadata use the folders name
+    # The `id` key is required to generate URLs
+    if "id" not in metadata:
+      metadata["id"] = os.path.split(folder)[-1]
+
+    return cls(metadata, review_data)
 
   @classmethod
-  def load_from_upload(cls, filename: str) -> "Hotel":
-    review_data = pd.read_pickle(os.path.join(directories.upload_path, filename))
-    return cls("uploaded_file", review_data)
+  def load_from_zip(cls, zipfile_path: str) -> "Hotel":
+    folder_path, filetype = zipfile_path.split(".")
+    if filetype != "zip":
+      raise NameError("Failed to read file of type {}. Make sure that the "
+                      "directory does not contain dots.".format(filetype))
 
-  @staticmethod
-  def find_txt(data_dir: str):
-    """Finds all `txt` files in the given directory.
+    if not os.path.isdir(folder_path):
+      with zipfile.ZipFile(zipfile_path, "r") as zip_ref:
+        zip_ref.extractall(folder_path)
 
-    Args:
-      data_dir: The directory path to search for `txt`.
-
-    Returns:
-      The full path of the found `text`.
-
-    Raises:
-      FileExistsError if more than one `txt`s are found in the given path.
-      FileNotFoundError if no `txt`s exist in the given.
-    """
-    all_files = os.listdir(data_dir)
-    txt = None
-    for file in all_files:
-      if file.split(".")[-1] == "txt":
-        if txt is None:
-          txt = file
-        else:
-          raise FileExistsError("Multiple .txt files found in {}.".format(data_dir))
-    if txt is None:
-      raise FileNotFoundError("Could not find .txt file in {}.".format(data_dir))
-    return os.path.join(data_dir, txt)
+    return cls.load_from_folder(folder_path)
 
   @property
   def app_url(self):
