@@ -1,35 +1,13 @@
 import os
 import json
 import flask
-import zipfile
 import pandas as pd
-from tools import containers
+from tools import containers, utils
 
 import plotly
 from plotly import graph_objects as go
 
-from typing import Any, Dict, List, Optional
-
-
-def find_files_of_type(folder_path: str, target_type: str = "txt") -> List[str]:
-  """Finds all files of a specific type in the given directory.
-
-    Args:
-      folder_path: The directory path to search for files.
-      target_type: The type of files to find (eg. txt, pkl, csv, etc.)
-
-    Returns:
-      The full path of all files with the required type
-  """
-  all_files = os.listdir(folder_path)
-  found_files = []
-  for file in all_files:
-    if len(file.split(".")) > 2:
-      raise NameError("Cannot identify type of {}.".format(file))
-    if file.split(".")[-1] == target_type:
-      found_files.append(os.path.join(folder_path, file))
-
-  return found_files
+from typing import Any, Dict
 
 
 class Hotel:
@@ -61,7 +39,7 @@ class Hotel:
       raise FileNotFoundError("Unable to find directory {}.".format(folder))
 
     # Load hotel metadata (star ratings, etc.)
-    metafile_dir = find_files_of_type(folder, target_type="txt")
+    metafile_dir = utils.find_files_of_type(folder, target_type="txt")
     if len(metafile_dir) > 1:
       raise FileExistsError("Multiple txt files found in {}.".format(folder))
     elif len(metafile_dir) == 0:
@@ -70,8 +48,8 @@ class Hotel:
       metadata = json.load(file)
 
     # Load DataFrame from csv/pkl
-    pkl_files = find_files_of_type(folder, target_type="pkl")
-    csv_files = find_files_of_type(folder, target_type="csv")
+    pkl_files = utils.find_files_of_type(folder, target_type="pkl")
+    csv_files = utils.find_files_of_type(folder, target_type="csv")
     if len(csv_files) + len(pkl_files) > 1:
       raise FileExistsError("Multiple data files found in {}.".format(folder))
     elif len(csv_files) + len(pkl_files) == 0:
@@ -88,19 +66,6 @@ class Hotel:
       metadata["id"] = os.path.split(folder)[-1]
 
     return cls(metadata, review_data)
-
-  @classmethod
-  def load_from_zip(cls, zipfile_path: str) -> "Hotel":
-    folder_path, filetype = zipfile_path.split(".")
-    if filetype != "zip":
-      raise NameError("Failed to read file of type {}. Make sure that the "
-                      "directory does not contain dots.".format(filetype))
-
-    if not os.path.isdir(folder_path):
-      with zipfile.ZipFile(zipfile_path, "r") as zip_ref:
-        zip_ref.extractall(folder_path)
-
-    return cls.load_from_folder(folder_path)
 
   @property
   def app_url(self):
