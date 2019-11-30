@@ -8,8 +8,8 @@ base = "D:/"
 opinion_lexicon = "C:/Users/SU/Documents/GitHub/Text-Classification"
 
 
-airbnb = os.path.join(base, "AirbnbReviews")
 trip_advisor = os.path.join(base, "TripAdvisorReviews")
+upload_path = os.path.join(base, "TripAdvisorReviews", "uploaded_files")
 google_word2vec = os.path.join(base, "GoogleNews-vectors-negative300.bin.gz")
 
 

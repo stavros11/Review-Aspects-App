@@ -70,6 +70,11 @@ class Hotel:
 
     return cls(folder_name, review_data, hotel_data, load_name=file_name)
 
+  @classmethod
+  def load_from_upload(cls, filename: str) -> "Hotel":
+    review_data = pd.read_pickle(os.path.join(directories.upload_path, filename))
+    return cls("uploaded_file", review_data)
+
   @staticmethod
   def find_txt(data_dir: str):
     """Finds all `txt` files in the given directory.
