@@ -99,7 +99,7 @@ class Hotel:
   @property
   def app_url(self):
     """URL that redirects back to the hotel's main page."""
-    return flask.url_for("main", hotelname=self.id)
+    return flask.url_for("analysis", hotelname=self.id)
 
   @property
   def n_reviews(self) -> int:
