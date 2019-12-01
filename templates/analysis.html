@@ -82,12 +82,12 @@
 						<article>
                             <center><h3>Positive Aspects</h3></center>
                             <table>
-                              {% for pos in pos_aspects %}
+                              {% for pos in hotel.aspects.most_common_positive[:n_aspects] %}
                                 <tr>
-                                  <td class="admin" style="padding-right: 50px;"> <a href= {{ pos.url }}>{{ pos.text }}</a> </td>
+                                  <td class="admin" style="padding-right: 50px;"> <a href= {{ url_for("analysis", hotelname=hotel.id, word="{}__pos".format(pos.text)) }}>{{ pos.text }}</a> </td>
                                   <td class="admin" style="padding-right: 15px;"> {{ pos.score }} </td>
-                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{}".format(pos.pos_appearances) }} </font> </td>
-                                  <td class "admin"> <font color="Tomato">{{ "{}".format(pos.neg_appearances) }} </font> </td>
+                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{}".format(pos.positive_appearances) }} </font> </td>
+                                  <td class "admin"> <font color="Tomato">{{ "{}".format(pos.negative_appearances) }} </font> </td>
                                 </tr>
                               {% endfor %}
                             </table>
@@ -100,12 +100,12 @@
 						<article>
                             <center><h3>Negative Aspects</h3></center>
                             <table>
-                              {% for neg in neg_aspects %}
+                              {% for neg in hotel.aspects.most_common_negative[:n_aspects] %}
                                 <tr>
-                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ neg.url }}>{{ neg.text }}</a> </td>
+                                  <td class="admin" style="padding: 0px 50px 0px 0px;"> <a href={{ url_for("analysis", hotelname=hotel.id, word="{}__neg".format(neg.text)) }}>{{ neg.text }}</a> </td>
                                     <td class="admin" style="padding-right: 15px;"> {{ neg.score }} </td>
-                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{}".format(neg.pos_appearances) }} </font> </td>
-                                  <td class "admin"> <font color="Tomato">{{ "{}".format(neg.neg_appearances) }} </font> </td>
+                                  <td class "admin" style="padding-right: 15px;"> <font color="MediumSeaGreen">{{ "{}".format(neg.positive_appearances) }} </font> </td>
+                                  <td class "admin"> <font color="Tomato">{{ "{}".format(neg.negative_appearances) }} </font> </td>
                                 </tr>
                               {% endfor %}
                             </table>
@@ -160,23 +160,6 @@
                                                    margin: {t: 20, b: 70}
                                                  };
                                     Plotly.newPlot('categoriesgraph', graphs, layout);
-                                </script>
-                            </div>
-						</article>
-					</div>
-
-					<div class="col-md-4 animate-box">
-						<article>
-                            <center><h3>Categorized Aspects Appearance</h3></center>
-                            <div class="chart" id="appsgraph">
-                                <script>
-                                    var graphs = {{ hotel.categoryapperances_barchart | safe }};
-                                    var layout = { xaxis: {title: "Score", titlefont: {size: 20}, tickfont: {size: 18}},
-                                                   yaxis: {tickfont: {size: 15}},
-                                                   height: 300,
-                                                   margin: {t: 20, b: 70}
-                                                 };
-                                    Plotly.newPlot('appsgraph', graphs, layout);
                                 </script>
                             </div>
 						</article>

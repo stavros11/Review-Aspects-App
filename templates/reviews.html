@@ -63,7 +63,7 @@
 					<div class="container">
 						<div class="col-md-12 col-md-offset-0">
 							<div class="animate-box">
-							<h2>Reviews with aspect: <font color= {{ title_color }} ><b>{{ word }}</font></b> </h2>
+							<h2>Reviews with aspect: <font color= {{ color }} ><b>{{ word }}</font></b> </h2>
 							<p class="breadcrumbs"><span><a href={{ hotel.app_url }}>Back to {{ hotel.name }} </a></span>
 							</div>
 						</div>
@@ -72,15 +72,15 @@
 			</div>
 
 			<div class="container">
-                 {% for review in reviews %}
+                 {% for review in hotel.aspects.known_words[word].get_reviews(mode) %}
 				<div class="row">
 					<div class="col-md-20 animate-box">
 						<article>
-							<h2><a href={{ review.absoluteUrl }}>{{ review.title }}</a></h2>
-							<p class="admin"><span>{{ review.publishedDate }}</span><br><span>Rating: {{review.rating }} / 5</span><br>
-							<span>Helpful Votes: {{ review.helpfulVotes }}</span></p>
-							<p>{{ review.colored_text|safe }}</p>
-							<p class="author-wrap"><a href="#" class="author">by {{ review.username }} from {{ review.user_hometownName }}</a></p>
+							<h2><a href={{ review.data.absoluteUrl }}>{{ review.data.title }}</a></h2>
+							<p class="admin"><span>{{ review.data.publishedDate }}</span><br><span>Rating: {{review.data.rating }} / 5</span><br>
+							<span>Helpful Votes: {{ review.data.helpfulVotes }}</span></p>
+							<p>{{ review.colored_text(word) | safe }}</p>
+							<p class="author-wrap"><a href="" class="author">by {{ review.data.username }} from {{ review.data.user_hometownName }}</a></p>
 						</article>
 					</div>
 				</div>

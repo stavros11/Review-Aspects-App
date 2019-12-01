@@ -1,56 +1,63 @@
+import os
 import flask
-import app_tools as tools
-from aspects import containers
+import tools
 from typing import Optional
 
 
 app = flask.Flask(__name__)
+#STORAGE_PATH = "D:/TripAdvisorReviews/app_storage"
+STORAGE_PATH = "/home/stavros/DATA/TripAdvisorReviews/app_storage"
+NUM_ASPECTS = 58
 
 
-def hotels_page():
-  hotels = [tools.hotel.Hotel(k) for k in tools.directories.hotel_order]
-  return flask.render_template("hotels.html", hotels=hotels)
-
-
-def analysis_page(hotelname: str, word: Optional[str] = None):
-  # hotelname is the name of the folder that contains all hotel files
-  hotel = tools.hotel.Hotel(hotelname)
-
-  # optionally use word2vec to merge words
-  #hotel.aspects.merge(cut_off=0.4)
-  #container = hotel.aspects.merged_container
-  # alternatively:
-  container = hotel.aspects.container
-
-  if word is not None:
-    return view_reviews_page(word, hotel, container)
-
-  pos_aspects = tools.aspects.aspects_generator(
-      container, hotel, mode="pos_scores", start=0, end=58)
-  neg_aspects = tools.aspects.aspects_generator(
-      container, hotel, mode="neg_scores", start=0, end=58)
-
-  return flask.render_template("aspects.html", pos_aspects=pos_aspects,
-                               neg_aspects=neg_aspects, hotel=hotel)
-
-
-def view_reviews_page(word_mode: str,
-                      hotel: tools.hotel.Hotel,
-                      container: containers.AspectContainers):
+def view_reviews(word_mode: str, hotel: tools.hotel.Hotel):
+  """Generates the reviews page for a given aspect word."""
   word, mode = word_mode.split("__")
-  color = tools.reviews.get_color(int(mode == "pos_scores")) # title color
-  reviews = tools.reviews.reviews_generator(word, container, hotel, mode)
-  return flask.render_template("reviews.html", reviews=reviews, word=word,
-                               hotel=hotel, title_color=color)
+  color = tools.containers.get_color(mode == "pos")
+  return flask.render_template("reviews.html", hotel=hotel,
+                               word=word, mode=mode, color=color)
+
+
+def upload_zip(file):
+  # TODO: Fix typing (from Werkzeug)
+  file_path = os.path.join(STORAGE_PATH, file.filename)
+  file.save(file_path)
+  hotel_path = tools.utils.unzip(file_path)
+  hotelname = os.path.split(hotel_path)[-1]
+  return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
 
 
 @app.route("/<hotelname>?word=<word>")
 @app.route("/<hotelname>")
-@app.route('/')
-def main(hotelname=None, word=None):
-  if hotelname is None:
-    return hotels_page()
-  return analysis_page(hotelname, word)
+def analysis(hotelname: str, word: Optional[str] = None):
+  """Generates the analysis page (with aspects and visualizations)."""
+  # hotelname is the name of the folder that contains all hotel files
+  hotel_path = os.path.join(STORAGE_PATH, hotelname)
+  hotel = tools.hotel.Hotel.load_from_folder(hotel_path)
+  # TODO: Implement word merging
+  if word is not None:
+    return view_reviews(word, hotel)
+
+  return flask.render_template("analysis.html", hotel=hotel, n_aspects=NUM_ASPECTS)
+
+
+@app.route('/', methods=["GET", "POST"])
+def main():
+  """Generates main page with available hotel photos."""
+  if flask.request.method == "POST":
+    if flask.request.form:
+      # TODO: Fix this to scrape instead of redirecting
+      return flask.redirect(flask.request.form["tripadvlink"])
+    if flask.request.files:
+      return upload_zip(flask.request.files["data"])
+
+  hotels = []
+  for file in os.listdir(STORAGE_PATH):
+    full_path = os.path.join(STORAGE_PATH, file)
+    if os.path.isdir(full_path):
+      hotels.append(tools.hotel.Hotel.load_from_folder(full_path))
+
+  return flask.render_template("home.html", hotels=hotels)
 
 
 if __name__ == "__main__":
