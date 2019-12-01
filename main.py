@@ -28,6 +28,7 @@ def upload_zip(file):
 
 
 def scrape(url: str):
+  import scraping
   # TODO: Fix case where we already have data for the given URL
   # (currently this should give an error)
 
@@ -35,11 +36,11 @@ def scrape(url: str):
   n = url.find("Reviews") + len("Reviews")
   url = "".join([url[:n], "{}", url[n:]])
   # Scrape reviews
-  scraper = tools.scraper.TripAdvisorScraper(url)
+  scraper = scraping.scraper.TripAdvisorScraper(url)
   scraper.scrape_reviews(max_reviews=10)
   scraper.save(STORAGE_PATH)
   # Find aspects
-  tools.aspects.find_aspects(scraper.csv_path)
+  scraping.aspects.find_aspects(scraper.csv_path)
   scraper.remove_csv()
   return flask.redirect(flask.url_for("analysis", hotelname=scraper.lower_name))
 
