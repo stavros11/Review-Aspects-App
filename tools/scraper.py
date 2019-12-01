@@ -184,6 +184,13 @@ class TripAdvisorScraper:
   def to_dataframe(self) -> pd.DataFrame:
     return pd.DataFrame(self.reviews, columns=self._REVIEW_TITLES)
 
+  @property
+  def csv_path(self) -> str:
+    if not hasattr(self, "_csv_path"):
+      raise FileNotFoundError("Scraped data for {} were not saved in csv."
+                              "".format(self.lower_name))
+    return self._csv_path
+
   def save(self, folder: str):
     folder_name = os.path.join(folder, self.lower_name)
     if os.path.isdir(folder_name):
@@ -191,10 +198,14 @@ class TripAdvisorScraper:
           folder_name))
 
     os.mkdir(folder_name)
-    txt_name = os.path.join(folder_name, "{}_meta.txt".format(self.lower_name))
-    csv_name = os.path.join(folder_name, "{}_{}reviews.csv".format(
+    txt_path = os.path.join(folder_name, "{}_meta.txt".format(self.lower_name))
+    self._csv_path = os.path.join(folder_name, "{}_{}reviews.csv".format(
         self.lower_name, self.n_reviews))
-    with open(txt_name, "w") as file:
+    with open(txt_path, "w") as file:
       json.dump(self.data, file)
     df = self.to_dataframe()
-    df.to_csv(csv_name, index=False)
+    df.to_csv(self.csv_path, index=False)
+
+  def remove_csv(self):
+    os.remove(self.csv_path)
+    self._csv_path = None

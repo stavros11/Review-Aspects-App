@@ -30,11 +30,17 @@ def upload_zip(file):
 def scrape(url: str):
   # TODO: Fix case where we already have data for the given URL
   # (currently this should give an error)
+
+  # Add {} url to access review pages
   n = url.find("Reviews") + len("Reviews")
   url = "".join([url[:n], "{}", url[n:]])
+  # Scrape reviews
   scraper = tools.scraper.TripAdvisorScraper(url)
   scraper.scrape_reviews(max_reviews=10)
   scraper.save(STORAGE_PATH)
+  # Find aspects
+  tools.aspects.find_aspects(scraper.csv_path)
+  scraper.remove_csv()
   return flask.redirect(flask.url_for("analysis", hotelname=scraper.lower_name))
 
 
@@ -48,7 +54,6 @@ def analysis(hotelname: str, word: Optional[str] = None):
   # TODO: Implement word merging
   if word is not None:
     return view_reviews(word, hotel)
-
   return flask.render_template("analysis.html", hotel=hotel, n_aspects=NUM_ASPECTS)
 
 
