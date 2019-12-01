@@ -27,6 +27,17 @@ def upload_zip(file):
   return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
 
 
+def scrape(url: str):
+  # TODO: Fix case where we already have data for the given URL
+  # (currently this should give an error)
+  n = url.find("Reviews") + len("Reviews")
+  url = "".join([url[:n], "{}", url[n:]])
+  scraper = tools.scraper.TripAdvisorScraper(url)
+  scraper.scrape_reviews(max_reviews=10)
+  scraper.save(STORAGE_PATH)
+  return flask.redirect(flask.url_for("analysis", hotelname=scraper.lower_name))
+
+
 @app.route("/<hotelname>?word=<word>")
 @app.route("/<hotelname>")
 def analysis(hotelname: str, word: Optional[str] = None):
@@ -47,7 +58,8 @@ def main():
   if flask.request.method == "POST":
     if flask.request.form:
       # TODO: Fix this to scrape instead of redirecting
-      return flask.redirect(flask.request.form["tripadvlink"])
+      return scrape(flask.request.form["tripadvlink"])
+
     if flask.request.files:
       return upload_zip(flask.request.files["data"])
 
