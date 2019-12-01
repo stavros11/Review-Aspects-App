@@ -5,7 +5,8 @@ from typing import Optional
 
 
 app = flask.Flask(__name__)
-STORAGE_PATH = "D:/TripAdvisorReviews/app_storage"
+#STORAGE_PATH = "D:/TripAdvisorReviews/app_storage"
+STORAGE_PATH = "/home/stavros/DATA/TripAdvisorReviews/app_storage"
 NUM_ASPECTS = 58
 
 
