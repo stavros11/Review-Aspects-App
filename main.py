@@ -44,8 +44,12 @@ def analysis(hotelname: str, word: Optional[str] = None):
 @app.route('/', methods=["GET", "POST"])
 def main():
   """Generates main page with available hotel photos."""
-  if flask.request.method == "POST" and flask.request.files:
-    return upload_zip(flask.request.files["data"])
+  if flask.request.method == "POST":
+    if flask.request.form:
+      # TODO: Fix this to scrape instead of redirecting
+      return flask.redirect(flask.request.form["tripadvlink"])
+    if flask.request.files:
+      return upload_zip(flask.request.files["data"])
 
   hotels = []
   for file in os.listdir(STORAGE_PATH):
