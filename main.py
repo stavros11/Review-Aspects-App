@@ -53,7 +53,7 @@ def main():
     if os.path.isdir(full_path):
       hotels.append(tools.hotel.Hotel.load_from_folder(full_path))
 
-  return flask.render_template("hotels.html", hotels=hotels)
+  return flask.render_template("home.html", hotels=hotels)
 
 
 if __name__ == "__main__":
