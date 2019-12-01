@@ -45,6 +45,15 @@ def scrape(url: str):
   return flask.redirect(flask.url_for("analysis", hotelname=scraper.lower_name))
 
 
+@app.route("/download/<hotelname>")
+def download(hotelname: str):
+  hotel_path = os.path.join(STORAGE_PATH, hotelname)
+  txt_path = tools.utils.find_files_of_type(hotel_path, target_type="txt")[0]
+  txt_filename = os.path.split(txt_path)[-1]
+  print(txt_filename)
+  return flask.send_from_directory(STORAGE_PATH, filename=txt_filename)
+
+
 @app.route("/<hotelname>?word=<word>")
 @app.route("/<hotelname>")
 def analysis(hotelname: str, word: Optional[str] = None):
