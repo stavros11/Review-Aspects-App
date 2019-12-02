@@ -10,7 +10,7 @@ The method and code for identifying aspects is inspired by Peter Min's amazing [
 
 Identifying aspects in customer reviews is an interesting branch of NLP that allows to extract information beyond simple star ratings (which are known to be subjective and focused on very specific categories). The results from such analysis could be useful both for the management by identifying:
   * weak aspects that need improvement
-  * strong aspects to use in advertisement.
+  * strong aspects to use in advertisement,
   
 but also for customers, who could check how a hotel performs in aspects they find important. Furthermore the methods are applicable to any area with abundance of customer reviews (restaurants, products, etc.).
 
@@ -37,7 +37,7 @@ When running the app locally, all scraped hotel data are saved in a local static
 ![analysispage](https://github.com/stavros11/Review-Aspects-App/blob/45002dc995708404eef5726cf9b92d0bc29b7116/screenshots/analysispage.png?raw=true)
 
 Clicking to a specific hotel redirects to a page with its most common positive and negative aspects. Each aspect word is mapped three numbers:
-  1. The overal sentiment score (**TODO:** Add details on how this is calculated).
+  1. The overal sentiment score (see [bellow](#opinion-mining)).
   2. The number of reviews that the word appears as a *positive* aspect.
   3. The number of reviews that the word appears as a *negative* aspect.
   
@@ -55,6 +55,17 @@ The analysis page also contains simple visualizations:
 Clicking on a specific aspect word gives all the reviews for which this word was identified as an aspect. The word is shown in bold and other aspect words in the same review are highlighted as green/red for positive/negative sentiment score. This allows to check exactly what people are saying about the selected aspect!
 
 *Bonus feature:* Clicking in the review title redirects to the review on Trip Advisor's website.
+
+## Opinion mining
+
+The goal of aspect-based opinion mining is to identify particular aspects, expressed via single words or small phrases, for which customers express an opinion in their review. For example in the following hypothetical review:
+
+![spacyparser](https://github.com/stavros11/Review-Aspects-App/blob/fix_readme/screenshots/spacyparser.png?raw=true)
+**TODO:** Use a smaller sentence in this figure.
+
+the aspect `restaurant` is identified with a positive score. The way we identify such aspects starts with a predifined lexicon of positive and negative words that people usually use when they are expressing opinions. When a word from our lexicon is found in a review, we explore its relation to other words using spaCy's depedency parser and we find aspects using these relationships. Each aspect is given a +1 score if it is associated with a positive opinion word or a -1 score for negative. In some cases a higher or lower score may be assigned if words such as `very`, etc. are used. If the same word is identified as an aspect multiple times in a single review then individual scores are summed. 
+
+Using this procedure a dictionary (`collections.Counter`) that maps word aspects to their score is extracted for each review.
 
 ## Disclaimer
 
