@@ -27,8 +27,39 @@ def upload_zip(file):
   return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
 
 
-@app.route("/<hotelname>?word=<word>")
-@app.route("/<hotelname>")
+def scrape(url: str):
+  import scraping
+  # TODO: Fix case where we already have data for the given URL
+  # (currently this should give an error)
+
+  # Add {} url to access review pages
+  n = url.find("Reviews") + len("Reviews")
+  url = "".join([url[:n], "{}", url[n:]])
+  # Scrape reviews
+  scraper = scraping.scraper.TripAdvisorScraper(url)
+  scraper.scrape_reviews(max_reviews=10)
+  scraper.save(STORAGE_PATH)
+  # Find aspects
+  scraping.aspects.find_aspects(scraper.csv_path)
+  scraper.remove_csv()
+  return flask.redirect(flask.url_for("analysis", hotelname=scraper.lower_name))
+
+
+@app.route("/download/<hotelname>")
+def download(hotelname: str):
+  # TODO: Fix this because currently it is not working
+  hotel_path = os.path.join(STORAGE_PATH, hotelname)
+  #print("\n\n{}\n\n".format(hotel_path))
+  txt_path = tools.utils.find_files_of_type(hotel_path, target_type="pkl")[0]
+  #print("\n\n{}\n\n".format(txt_path))
+  txt_filename = os.path.split(txt_path)[-1]
+  #print("\n\n{}\n\n".format(txt_filename))
+  return flask.send_from_directory(hotel_path, filename=txt_filename,
+                                   mimetype="application/octet-stream")
+
+
+@app.route("/analysis/<hotelname>?word=<word>")
+@app.route("/analysis/<hotelname>")
 def analysis(hotelname: str, word: Optional[str] = None):
   """Generates the analysis page (with aspects and visualizations)."""
   # hotelname is the name of the folder that contains all hotel files
@@ -37,7 +68,6 @@ def analysis(hotelname: str, word: Optional[str] = None):
   # TODO: Implement word merging
   if word is not None:
     return view_reviews(word, hotel)
-
   return flask.render_template("analysis.html", hotel=hotel, n_aspects=NUM_ASPECTS)
 
 
@@ -46,8 +76,8 @@ def main():
   """Generates main page with available hotel photos."""
   if flask.request.method == "POST":
     if flask.request.form:
-      # TODO: Fix this to scrape instead of redirecting
-      return flask.redirect(flask.request.form["tripadvlink"])
+      return scrape(flask.request.form["tripadvlink"])
+
     if flask.request.files:
       return upload_zip(flask.request.files["data"])
 

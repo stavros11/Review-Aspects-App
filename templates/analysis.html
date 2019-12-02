@@ -69,6 +69,7 @@
 							<div class="animate-box">
 							<h2> {{ hotel.name }} </h2>
 							<p class="breadcrumbs"><span><a href="/">Home</a></span>
+							<p class="breadcrumbs"><span><a href={{ url_for("download", hotelname=hotel.id) }}>Download</a></span>
 							</div>
 						</div>
 					</div>
