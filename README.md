@@ -25,12 +25,16 @@ but also for customers, who could check how a hotel performs in aspects they fin
 
 ### Main page
 
+![mainpage](https://github.com/stavros11/Review-Aspects-App/blob/e88a3de4069d5e013cc524a259c9ad981ebd2b42/screenshots/homepage.png?raw=true)
+
 When running the app locally, all scraped hotel data are saved in a local static path (`STORAGE_PATH`). The available hotels that already exist there will appear in the main page. It is possible to add a new hotel in two different ways:
  
  1. By providing a Trip Advisor URL to scrape and analyze from scratch.
  2. By uploading the data of a previously scraped hotel (for example from a different directory or a different computer).
  
 ### Hotel analysis page
+
+![analysispage](https://github.com/stavros11/Review-Aspects-App/blob/45002dc995708404eef5726cf9b92d0bc29b7116/screenshots/analysispage.png?raw=true)
 
 Clicking to a specific hotel redirects to a page with its most common positive and negative aspects. Each aspect word is mapped three numbers:
   1. The overal sentiment score (**TODO:** Add details on how this is calculated).
@@ -46,6 +50,14 @@ The analysis page also contains simple visualizations:
   
 #### Reviews that contain an identified aspect
 
+![reviewpage](https://github.com/stavros11/Review-Aspects-App/blob/45002dc995708404eef5726cf9b92d0bc29b7116/screenshots/reviewpage.png?raw=true)
+
 Clicking on a specific aspect word gives all the reviews for which this word was identified as an aspect. The word is shown in bold and other aspect words in the same review are highlighted as green/red for positive/negative sentiment score. This allows to check exactly what people are saying about the selected aspect!
 
 *Bonus feature:* Clicking in the review title redirects to the review on Trip Advisor's website.
+
+## Disclaimer
+
+The app was developed in my free time, is not used for profit and is not related to any professional project. I am not affiliated with the hotels mentioned in the above screenshots, except Stavros Melathron Studios which is owned by my parents and gave me the idea for this project (so I thought of giving back some credit!). The other hotels are used for demonstration puproses and I do not intend to advertise or criticize them. I am not affiliated with Trip Advisor and all scraped data are publicly accessible.
+
+The aspect identification was (mostly) taken from [Peter Min's repo](https://github.com/pmin91/DS_projects). The rest functionality (scraping, aspect collection and flask deployment) was developed by myself following various online guides and videos.
