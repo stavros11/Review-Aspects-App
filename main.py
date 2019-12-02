@@ -47,15 +47,19 @@ def scrape(url: str):
 
 @app.route("/download/<hotelname>")
 def download(hotelname: str):
+  # TODO: Fix this because currently it is not working
   hotel_path = os.path.join(STORAGE_PATH, hotelname)
-  txt_path = tools.utils.find_files_of_type(hotel_path, target_type="txt")[0]
+  #print("\n\n{}\n\n".format(hotel_path))
+  txt_path = tools.utils.find_files_of_type(hotel_path, target_type="pkl")[0]
+  #print("\n\n{}\n\n".format(txt_path))
   txt_filename = os.path.split(txt_path)[-1]
-  print(txt_filename)
-  return flask.send_from_directory(STORAGE_PATH, filename=txt_filename)
+  #print("\n\n{}\n\n".format(txt_filename))
+  return flask.send_from_directory(hotel_path, filename=txt_filename,
+                                   mimetype="application/octet-stream")
 
 
-@app.route("/<hotelname>?word=<word>")
-@app.route("/<hotelname>")
+@app.route("/analysis/<hotelname>?word=<word>")
+@app.route("/analysis/<hotelname>")
 def analysis(hotelname: str, word: Optional[str] = None):
   """Generates the analysis page (with aspects and visualizations)."""
   # hotelname is the name of the folder that contains all hotel files
@@ -72,7 +76,6 @@ def main():
   """Generates main page with available hotel photos."""
   if flask.request.method == "POST":
     if flask.request.form:
-      # TODO: Fix this to scrape instead of redirecting
       return scrape(flask.request.form["tripadvlink"])
 
     if flask.request.files:
