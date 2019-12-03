@@ -48,6 +48,8 @@ The analysis page also contains simple visualizations:
   * Pie chart with the sentiment of reviews from our aspect analysis.
   * Bar chart with category star ratings (1-5) as scraped from Trip Advisor.
   
+It is also possible to download the data presented in this page. This returns a `zip` file that contains a `pd.DataFrame` stored as `pkl` or `csv` and a `txt` with some hotel metadata. This `zip` can be uploaded in the main page to load the same hotel in a different computer.
+  
 #### Reviews that contain an identified aspect
 
 ![reviewpage](https://github.com/stavros11/Review-Aspects-App/blob/45002dc995708404eef5726cf9b92d0bc29b7116/screenshots/reviewpage.png?raw=true)
@@ -63,7 +65,7 @@ The goal of aspect-based opinion mining is to identify particular aspects, expre
 ![spacyparser](https://github.com/stavros11/Review-Aspects-App/blob/fix_readme/screenshots/spacyparser.png?raw=true)
 **TODO:** Use a smaller sentence in this figure.
 
-the aspect `restaurant` is identified with a positive score. The way we identify such aspects starts with a predifined lexicon of positive and negative words that people usually use when they are expressing opinions. When a word from our lexicon is found in a review, we explore its relation to other words using spaCy's depedency parser and we find aspects using these relationships. Each aspect is given a +1 score if it is associated with a positive opinion word or a -1 score for negative. In some cases a higher or lower score may be assigned if words such as `very`, etc. are used. If the same word is identified as an aspect multiple times in a single review then individual scores are summed. 
+the aspect `restaurant` is identified with a positive (+1) score, while the aspect `location` is given a negative (-1) score. The way we identify such aspects starts with a predifined lexicon of positive and negative words that people usually use when they are expressing opinions. When a word from our lexicon is found in a review, we explore its relation to other words using spaCy's depedency parser and we find aspects using these relationships. Each aspect is given a +1 score if it is associated with a positive opinion word or a -1 score for negative. In some cases a higher or lower score may be assigned if words such as `very`, etc. are used. If the same word is identified as an aspect multiple times in a single review then individual scores are summed. 
 
 Using this procedure a dictionary (`collections.Counter`) that maps word aspects to their score is extracted for each review.
 
