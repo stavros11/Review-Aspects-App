@@ -1,5 +1,6 @@
 import collections
 import pandas as pd
+from tools.stopwords import STOP_WORDS
 from typing import List, Optional, Union
 
 
@@ -113,6 +114,8 @@ class Review:
 class AspectsCollection:
   """Data structure that handles `AspectWord` and `Review` collections.
 
+  Ignores aspects that included in the `STOP_WORDS` set.
+
   Contains:
     * self.reviews: List of `Review` with the ordering of the DataFrame.
     * known_words: Dict from words (str) to the corresponding `AspectWord`.
@@ -136,6 +139,9 @@ class AspectsCollection:
       self.reviews.append(review)
 
       for word, score in aspect_counter.items():
+        if word in STOP_WORDS:
+          continue
+
         if word in self.known_words:
           aspect = self.known_words[word]
         else:
