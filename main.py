@@ -12,15 +12,18 @@ app.config["STORAGE_PATH"] = "D:/TripAdvisorReviews/app_storage"
 #app.config["STORAGE_PATH"] = "/home/stavros/DATA/TripAdvisorReviews/app_storage"
 # Number of aspects to show in `analysis` page
 app.config["NUM_ASPECTS"] = 58
-# Maximum number of reviews to scrape when a trip advisor link is given.
-# This should be removed (or set to None) to scrape all available reviews for
-# the given hotel, however then spaCy may take some time to run and we do not
-# have a nice loading screen implemented
-app.config["MAX_SCRAPE_REVIEWS"] = 10
 
 
-def scrape(url: str):
-  """Scrapes a hotel from Trip Advisor and generates its analysis page."""
+def scrape(url: str, max_pages: Optional[int] = None):
+  """Scrapes a hotel from Trip Advisor and generates its analysis page.
+
+  Args:
+    url: URL of the Trip Advisor main page of the hotel.
+    max_pages: Maximum number of review pages to scrape.
+      If None all available reviews are scraped. It is advisable to use a small
+      number for testing because spaCy may take some time to run and we do not
+      have a nice loading screen implemented yet.
+  """
   import scraping
   # TODO: Fix case where we already have data for the given URL
   # (currently this should give an error)
@@ -30,7 +33,9 @@ def scrape(url: str):
   url = "".join([url[:n], "{}", url[n:]])
   # Scrape reviews
   scraper = scraping.scraper.TripAdvisorScraper(url)
-  scraper.scrape_reviews(max_reviews=app.config["MAX_SCRAPE_REVIEWS"])
+  # FIXME: Fix the scraper to take max_pages instead of max_reviews as Trip
+  # Advisor may change in the future and no longer have 5 reviews per page
+  scraper.scrape_reviews(max_reviews=max_pages * 5)
   scraper.save(app.config["STORAGE_PATH"])
   # Find aspects
   scraping.aspects.find_aspects(scraper.csv_path)
@@ -50,6 +55,7 @@ def download(hotelname: str):
   return flask.send_from_directory(directory=app.config["STORAGE_PATH"],
                                    filename=zip_name,
                                    as_attachment=True)
+
 
 @app.route("/analysis/<hotelname>/delete")
 def delete(hotelname: str):
@@ -124,7 +130,18 @@ def main():
   """Generates main page with available hotels and options to add more."""
   if flask.request.method == "POST":
     if flask.request.form:
-      return scrape(flask.request.form["tripadvlink"])
+      if "maxpages" in flask.request.form:
+        max_review_pages = flask.request.form["maxpages"]
+      else:
+        max_review_pages = None
+
+      if max_review_pages is not None:
+        if not max_review_pages.isdigit():
+          raise ValueError("Number of review pages should be an integer "
+                           "but {} was given.".format(max_review_pages))
+        max_review_pages = int(max_review_pages)
+
+      return scrape(flask.request.form["tripadvlink"], max_pages=max_review_pages)
 
     if flask.request.files:
       return upload_zip(flask.request.files["data"])

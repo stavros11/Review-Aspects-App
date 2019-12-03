@@ -91,7 +91,8 @@ class TripAdvisorScraper:
 
   def scrape_reviews(self, start_page: int = 0, max_reviews: Optional[int] = None):
     counter = start_page * self.reviews_per_page
-    if max_reviews is None: max_reviews = self.n_reviews
+    if max_reviews is None or max_reviews > self.n_reviews:
+      max_reviews = self.n_reviews
 
     while counter < max_reviews:
       url = self._get_url(counter)
