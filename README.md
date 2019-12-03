@@ -10,20 +10,20 @@ The method and code for identifying aspects is inspired by Peter Min's amazing [
 
 Identifying aspects in customer reviews is an interesting branch of NLP that allows to extract information beyond simple star ratings (which are known to be subjective and focused on very specific categories). The results from such analysis could be useful both for the management by identifying:
   * weak aspects that need improvement
-  * strong aspects to use in advertisement.
+  * strong aspects to use in advertisement,
   
 but also for customers, who could check how a hotel performs in aspects they find important. Furthermore the methods are applicable to any area with abundance of customer reviews (restaurants, products, etc.).
 
 ## Depedencies
 
- * `pandas`, `plotly`.
- * `requests`, `bs4` for scraping.
- * `spaCy` with an English model for identifying aspects.
- * `flask` for app deployment.
+ * Required: `pandas`, `plotly`, `flask`.
+ * Required only for the scraping and aspect identification part (not required when uploading preprocessed data): `requests`, `bs4`, `spaCy` with `en_core_web_sm` model.
  
 ## Main usage
 
 ### Main page
+
+![mainpage](https://github.com/stavros11/Review-Aspects-App/blob/e88a3de4069d5e013cc524a259c9ad981ebd2b42/screenshots/homepage.png?raw=true)
 
 When running the app locally, all scraped hotel data are saved in a local static path (`STORAGE_PATH`). The available hotels that already exist there will appear in the main page. It is possible to add a new hotel in two different ways:
  
@@ -32,20 +32,43 @@ When running the app locally, all scraped hotel data are saved in a local static
  
 ### Hotel analysis page
 
+![analysispage](https://github.com/stavros11/Review-Aspects-App/blob/45002dc995708404eef5726cf9b92d0bc29b7116/screenshots/analysispage.png?raw=true)
+
 Clicking to a specific hotel redirects to a page with its most common positive and negative aspects. Each aspect word is mapped three numbers:
-  1. The overal sentiment score (**TODO:** Add details on how this is calculated).
+  1. The overal sentiment score (see [below](#opinion-mining)).
   2. The number of reviews that the word appears as a *positive* aspect.
   3. The number of reviews that the word appears as a *negative* aspect.
   
-Words are sorted according to sentiment score (most positive / most negative).
+Words are sorted according to sentiment score (most positive / most negative). Furthermore we ignore words that are in spaCy's set of stopwords.
 
 The analysis page also contains simple visualizations:
   * Pie chart with the hotel star ratings (1-5) as scraped from Trip Advisor.
   * Pie chart with the sentiment of reviews from our aspect analysis.
   * Bar chart with category star ratings (1-5) as scraped from Trip Advisor.
   
+It is also possible to download the data presented in this page. This returns a `zip` file that contains a `pd.DataFrame` stored as `pkl` or `csv` and a `txt` with some hotel metadata. This `zip` can be uploaded in the main page to load the same hotel in a different computer.
+  
 #### Reviews that contain an identified aspect
+
+![reviewpage](https://github.com/stavros11/Review-Aspects-App/blob/45002dc995708404eef5726cf9b92d0bc29b7116/screenshots/reviewpage.png?raw=true)
 
 Clicking on a specific aspect word gives all the reviews for which this word was identified as an aspect. The word is shown in bold and other aspect words in the same review are highlighted as green/red for positive/negative sentiment score. This allows to check exactly what people are saying about the selected aspect!
 
 *Bonus feature:* Clicking in the review title redirects to the review on Trip Advisor's website.
+
+## Opinion mining
+
+The goal of aspect-based opinion mining is to identify particular aspects, expressed via single words or small phrases, for which customers express an opinion in their review. For example in the following hypothetical review:
+
+![spacyparser](https://github.com/stavros11/Review-Aspects-App/blob/fix_readme/screenshots/spacyparser.png?raw=true)
+**TODO:** Use a smaller sentence in this figure.
+
+the aspect `restaurant` is identified with a positive (+1) score, while the aspect `location` is given a negative (-1) score. The way we identify such aspects starts with a predifined lexicon of positive and negative words that people usually use when they are expressing opinions. When a word from our lexicon is found in a review, we explore its relation to other words using spaCy's depedency parser and we find aspects using these relationships. Each aspect is given a +1 score if it is associated with a positive opinion word or a -1 score for negative. In some cases a higher or lower score may be assigned if words such as `very`, etc. are used. If the same word is identified as an aspect multiple times in a single review then individual scores are summed. 
+
+Using this procedure a dictionary (`collections.Counter`) that maps word aspects to their score is extracted for each review.
+
+## Disclaimer
+
+The app was developed in my free time, is not used for profit and is not related to any professional project. I am not affiliated with the hotels mentioned in the above screenshots, except Stavros Melathron Studios which is owned by my parents and gave me the idea for this project (so I thought of giving back some credit!). The other hotels are used for demonstration puproses and I do not intend to advertise or criticize them. I am not affiliated with Trip Advisor and all scraped data are publicly accessible.
+
+The aspect identification was (mostly) taken from [Peter Min's repo](https://github.com/pmin91/DS_projects). The rest functionality (scraping, aspect collection and flask deployment) was developed by myself following various online guides and videos.
