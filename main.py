@@ -1,5 +1,6 @@
 import os
 import flask
+import shutil
 import tools
 from typing import Optional
 
@@ -78,6 +79,23 @@ def download(hotelname: str):
   return flask.send_from_directory(directory=app.config["STORAGE_PATH"],
                                    filename=zip_name,
                                    as_attachment=True)
+
+@app.route("/analysis/<hotelname>/delete")
+def delete(hotelname: str):
+  """Deletes the hotel from the app storage.
+
+  Deletes both the folder and the zip file of the hotel.
+  """
+  zip_name = ".".join([hotelname, "zip"])
+  zip_path = os.path.join(app.config["STORAGE_PATH"], zip_name)
+  if os.path.exists(zip_path):
+    os.remove(zip_path)
+
+  folder_path = os.path.join(app.config["STORAGE_PATH"], hotelname)
+  if os.path.exists(folder_path):
+    shutil.rmtree(folder_path)
+
+  return flask.redirect(flask.url_for("main"))
 
 
 @app.route("/analysis/<hotelname>?word=<word>")

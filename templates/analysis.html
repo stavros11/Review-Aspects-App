@@ -68,8 +68,12 @@
 						<div class="col-md-12 col-md-offset-0">
 							<div class="animate-box">
 							<h2> {{ hotel.name }} </h2>
-							<p class="breadcrumbs"><span><a href="/">Home</a></span>
-							<p class="breadcrumbs"><span><a href={{ url_for("download", hotelname=hotel.id) }}>Download</a></span>
+							<p class="breadcrumbs">
+							<span><a href="/">Home</a></span>
+							&emsp;
+							<span><a href={{ url_for("download", hotelname=hotel.id) }}>Download</a></span>
+							&emsp;
+							<span><a href={{ url_for("delete", hotelname=hotel.id) }}>Delete</a></span>
 							</div>
 						</div>
 					</div>
