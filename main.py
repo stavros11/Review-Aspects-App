@@ -68,16 +68,16 @@ def scrape(url: str):
 
 @app.route("/analysis/<hotelname>/download")
 def download(hotelname: str):
-  # TODO: Fix this because currently it is not working
-  print("\n\nDownload called\n\n")
-  hotel_path = os.path.join(app.config["STORAGE_PATH"], hotelname)
-  print("\n\n{}\n\n".format(hotel_path))
-  txt_path = tools.utils.find_files_of_type(hotel_path, target_type="pkl")[0]
-  print("\n\n{}\n\n".format(txt_path))
-  txt_filename = os.path.split(txt_path)[-1]
-  print("\n\n{}\n\n".format(txt_filename))
-  return flask.redirect(flask.url_for("main"))
-  #return flask.send_from_directory(directory=txt_path, filename=txt_filename)
+  """Downloads zip file with processed reviews pkl and hotel metadata txt."""
+  zip_name = ".".join([hotelname, "zip"])
+  zip_path = os.path.join(app.config["STORAGE_PATH"], zip_name)
+  if not os.path.exists(zip_path):
+    created_zip_path = tools.utils.zipdir(hotelname, app.config["STORAGE_PATH"])
+    assert created_zip_path == zip_path
+
+  return flask.send_from_directory(directory=app.config["STORAGE_PATH"],
+                                   filename=zip_name,
+                                   as_attachment=True)
 
 
 @app.route("/analysis/<hotelname>?word=<word>")
