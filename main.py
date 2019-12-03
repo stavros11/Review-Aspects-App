@@ -2,6 +2,7 @@ import os
 import flask
 import shutil
 import tools
+import werkzeug
 from typing import Optional
 
 
@@ -16,36 +17,6 @@ app.config["NUM_ASPECTS"] = 58
 # the given hotel, however then spaCy may take some time to run and we do not
 # have a nice loading screen implemented
 app.config["MAX_SCRAPE_REVIEWS"] = 10
-
-
-def view_reviews(word_mode: str, hotel: tools.hotel.Hotel):
-  """Generates the reviews page for a given aspect word.
-
-  This is called by `analysis` when a word is given.
-
-  Args:
-    word_mode: The word aspect that we want to generate the reviews for.
-      This should have the form "{}_{sent}" where {} is the word aspect
-      as a str and {sent} can be either 'pos' or 'neg' if the selected word
-      was a positive or a negative aspect.
-    hotel: Hotel object that we are generating the reviews for.
-      This is required because the review page has a link that points back
-      to the hotel analysis page.
-  """
-  word, mode = word_mode.split("__")
-  color = tools.containers.get_color(mode == "pos")
-  return flask.render_template("reviews.html", hotel=hotel,
-                               word=word, mode=mode, color=color)
-
-
-def upload_zip(file):
-  """Saves and unzips a zip file uploaded by the user."""
-  # TODO: Fix typing (from Werkzeug)
-  file_path = os.path.join(app.config["STORAGE_PATH"], file.filename)
-  file.save(file_path)
-  hotel_path = tools.utils.unzip(file_path)
-  hotelname = os.path.split(hotel_path)[-1]
-  return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
 
 
 def scrape(url: str):
@@ -98,6 +69,26 @@ def delete(hotelname: str):
   return flask.redirect(flask.url_for("main"))
 
 
+def view_reviews(word_mode: str, hotel: tools.hotel.Hotel):
+  """Generates the reviews page for a given aspect word.
+
+  This is called by `analysis` when a word is given.
+
+  Args:
+    word_mode: The word aspect that we want to generate the reviews for.
+      This should have the form "{}_{sent}" where {} is the word aspect
+      as a str and {sent} can be either 'pos' or 'neg' if the selected word
+      was a positive or a negative aspect.
+    hotel: Hotel object that we are generating the reviews for.
+      This is required because the review page has a link that points back
+      to the hotel analysis page.
+  """
+  word, mode = word_mode.split("__")
+  color = tools.containers.get_color(mode == "pos")
+  return flask.render_template("reviews.html", hotel=hotel,
+                               word=word, mode=mode, color=color)
+
+
 @app.route("/analysis/<hotelname>?word=<word>")
 @app.route("/analysis/<hotelname>")
 def analysis(hotelname: str, word: Optional[str] = None):
@@ -117,6 +108,15 @@ def analysis(hotelname: str, word: Optional[str] = None):
     return view_reviews(word, hotel)
   return flask.render_template("analysis.html", hotel=hotel,
                                n_aspects=app.config["NUM_ASPECTS"])
+
+
+def upload_zip(file: werkzeug.datastructures.FileStorage):
+  """Saves and unzips a zip file uploaded by the user."""
+  file_path = os.path.join(app.config["STORAGE_PATH"], file.filename)
+  file.save(file_path)
+  hotel_path = tools.utils.unzip(file_path)
+  hotelname = os.path.split(hotel_path)[-1]
+  return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
 
 
 @app.route('/', methods=["GET", "POST"])
