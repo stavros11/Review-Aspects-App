@@ -16,10 +16,8 @@ but also for customers, who could check how a hotel performs in aspects they fin
 
 ## Depedencies
 
- * `pandas`, `plotly`.
- * `requests`, `bs4` for scraping.
- * `spaCy` with an English model for identifying aspects.
- * `flask` for app deployment.
+ * Required: `pandas`, `plotly`, `flask`.
+ * Required only for the scraping and aspect identification part (not required when uploading preprocessed data): `requests`, `bs4`, `spaCy` with `en_core_web_sm` model.
  
 ## Main usage
 
@@ -37,11 +35,11 @@ When running the app locally, all scraped hotel data are saved in a local static
 ![analysispage](https://github.com/stavros11/Review-Aspects-App/blob/45002dc995708404eef5726cf9b92d0bc29b7116/screenshots/analysispage.png?raw=true)
 
 Clicking to a specific hotel redirects to a page with its most common positive and negative aspects. Each aspect word is mapped three numbers:
-  1. The overal sentiment score (see [bellow](#opinion-mining)).
+  1. The overal sentiment score (see [below](#opinion-mining)).
   2. The number of reviews that the word appears as a *positive* aspect.
   3. The number of reviews that the word appears as a *negative* aspect.
   
-Words are sorted according to sentiment score (most positive / most negative).
+Words are sorted according to sentiment score (most positive / most negative). Furthermore we ignore words that are in spaCy's set of stopwords.
 
 The analysis page also contains simple visualizations:
   * Pie chart with the hotel star ratings (1-5) as scraped from Trip Advisor.
