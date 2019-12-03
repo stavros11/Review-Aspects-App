@@ -21,7 +21,7 @@ The app is currently deployed on the web using the free service of [Heroku](http
 
 Note that this is **NOT** production quality deployment and is not thoroughly tested! If you still like to play with it, check [Main usage](#main-usage) for a short guide on this can be used.
 
-**NOTE:** Scraping and finding aspects generally takes a few minutes depending on the number of reviews the target hotel has. A loading page is NOT implemented currently and during processing time you will just see your browser trying to load a page for long time. An easy way to test things is to set `pages to scrape` to a small value (1 or 2, that is 5 or 10 reviews). This will obviously make scraping faster but the results will not be very enlightening. If `pages to scrape` is left empty, it will attempt to scrape all reviews.
+**NOTE:** Scraping and finding aspects generally takes a few minutes depending on the number of reviews the target hotel has. Due to Heroku's time out this process will fail if one tries to scrape many pages (this will be fixed in the future). Currently it is possible to test the scraper by setting `pages to scrape` to a small value (1 or 2, that is 5 or 10 reviews). This will make scraping faster but obviously the results will not be very enlightening.
 
 ## Depedencies
 
