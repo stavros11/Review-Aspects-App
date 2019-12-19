@@ -25,6 +25,7 @@ def scrape(url: str, max_pages: Optional[int] = None):
       have a nice loading screen implemented yet.
   """
   import scraping
+  import nlptools
   # TODO: Fix case where we already have data for the given URL
   # (currently this should give an error)
 
@@ -38,7 +39,7 @@ def scrape(url: str, max_pages: Optional[int] = None):
   scraper.scrape_reviews(max_reviews=max_pages * 5)
   scraper.save(app.config["STORAGE_PATH"])
   # Find aspects
-  scraping.aspects.find_aspects(scraper.csv_path)
+  nlptools.aspects.find_aspects(scraper.csv_path)
   scraper.remove_csv()
   return flask.redirect(flask.url_for("analysis", hotelname=scraper.lower_name))
 

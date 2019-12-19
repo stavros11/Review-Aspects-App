@@ -7,7 +7,7 @@ import pandas as pd
 from spacy import tokens
 from typing import Iterable, List
 
-_CMAP_DIR = os.path.join(os.getcwd(), "scraping", "contractions.txt")
+_CMAP_DIR = os.path.join(os.getcwd(), "nlptools", "contractions.txt")
 with open(_CMAP_DIR, "r") as file:
   _CMAP = json.load(file)
 

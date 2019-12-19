@@ -2,7 +2,7 @@ import os
 import collections
 import pandas as pd
 from spacy import tokens
-from scraping import preprocessing
+from nlptools import preprocessing
 from typing import Iterable, List, Set
 
 
@@ -11,7 +11,7 @@ def load_words(lexicon_dir: str) -> Set[str]:
     file = open(os.path.join(lexicon_dir), encoding="ISO-8859-1")
     return set(line.strip() for line in file.readlines())
 
-_LEXICON_DIR = os.path.join(os.getcwd(), "scraping", "opinion-lexicon")
+_LEXICON_DIR = os.path.join(os.getcwd(), "nlptools", "opinion-lexicon")
 _POS_WORDS = load_words(os.path.join(_LEXICON_DIR, "pos_words.txt"))
 _NEG_WORDS = load_words(os.path.join(_LEXICON_DIR, "neg_words.txt"))
 _OPINION_WORDS = _POS_WORDS | _NEG_WORDS
