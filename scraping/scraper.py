@@ -29,6 +29,23 @@ def find_reviews_dict(root, target="mgmtResponse") -> Optional[str]:
   return None
 
 
+def find_dict_in_string(text: str) -> str:
+  """Finds dictionary in string by identifying open and closing brackets."""
+  # start by finding the first valid open {
+  pos0 = text.index("{")
+  while text[pos0 + 1] != '"':
+    pos0 += text[pos0 + 1:].index("{") + 1
+
+  pos, num_open = pos0, 1
+  while num_open > 0:
+    pos += 1
+    if text[pos] == "{":
+      num_open += 1
+    elif text[pos] == "}":
+      num_open -= 1
+  return text[pos0: pos + 1]
+
+
 def multiple_dict_indexing(d: Union[Dict, List], ids: List[str],
                            list_token="__LS__") -> Union[Dict, List]:
   if ids[0][:len(list_token)] == list_token:
@@ -114,12 +131,13 @@ class TripAdvisorScraper:
     return bs4.BeautifulSoup(req.text, "html.parser")
 
   def get_base(self, soup: bs4.BeautifulSoup) -> Dict:
-    n = len(self._SCRIPT_TARGET)
     scripts = [script for script in soup.find_all('script')
-               if script.text[:n] == self._SCRIPT_TARGET]
+               if script.text[:len(self._SCRIPT_TARGET)] == self._SCRIPT_TARGET]
     assert len(scripts) == 1
 
-    script_dict = json.loads(scripts[0].text[n + 15:-2])
+    # Locate dict to read using json
+    script_dict = find_dict_in_string(scripts[0].text)
+    script_dict = json.loads(script_dict)
     #base = script_dict["apolloCache"][0]["result"]["locations"][0]
 
     base_path = find_reviews_dict(script_dict)
