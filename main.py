@@ -8,8 +8,7 @@ from typing import Optional
 
 app = flask.Flask(__name__)
 # Storage directory
-app.config["STORAGE_PATH"] = "D:/TripAdvisorReviews/app_storage"
-#app.config["STORAGE_PATH"] = "/home/stavros/DATA/TripAdvisorReviews/app_storage"
+app.config["STORAGE_PATH"] = "/home/stavros/DATA/TripAdvisorReviews/app_storage"
 # Number of aspects to show in `analysis` page
 app.config["NUM_ASPECTS"] = 58
 
