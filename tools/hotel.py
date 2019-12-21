@@ -28,7 +28,7 @@ class Hotel:
     if "id" not in metadata:
       raise KeyError("Unable to find hotel id in hotel meta data file.")
     for k, v in metadata.items():
-        setattr(self, k, v)
+      setattr(self, k, v)
 
     self.data = review_data
     self.aspects = containers.AspectsCollection(review_data)
