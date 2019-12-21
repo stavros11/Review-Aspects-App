@@ -72,15 +72,16 @@
 			</div>
 
 			<div class="container">
-                 {% for review in hotel.aspects.known_words[word].get_reviews(mode) %}
+        {% for token in tokens %}
 				<div class="row">
 					<div class="col-md-20 animate-box">
 						<article>
-							<h2><a href={{ review.data.absoluteUrl }}>{{ review.data.title }}</a></h2>
-							<p class="admin"><span>{{ review.data.publishedDate }}</span><br><span>Rating: {{review.data.rating }} / 5</span><br>
-							<span>Helpful Votes: {{ review.data.helpfulVotes }}</span></p>
-							<p>{{ review.colored_text(word) | safe }}</p>
-							<p class="author-wrap"><a href="" class="author">by {{ review.data.username }} from {{ review.data.user_hometownName }}</a></p>
+							<h2><a href={{ token.review.data.absoluteUrl }}>{{ token.review.data.title }}</a></h2> -->
+							<p class="admin"><span>{{ token.review.data.publishedDate }}</span><br><span>Rating: {{ token.review.data.rating }} / 5</span><br>
+							<!-- <span>Helpful Votes: {{ token.review.data.helpfulVotes }}</span></p> -->
+							<!-- <p>{{ token.review.colored_text(word) | safe }}</p> -->
+              <p>{{ token.colored_sentence | safe}}</p>
+							<p class="author-wrap"><a href="" class="author">by {{ token.review.data.username }} from {{ token.review.data.user_hometownName }}</a></p> -->
 						</article>
 					</div>
 				</div>
@@ -132,4 +133,3 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 
 	</body>
 </html>
-

@@ -31,7 +31,8 @@ class Hotel:
       setattr(self, k, v)
 
     self.data = review_data
-    self.aspects = containers.AspectsCollection(review_data)
+    self.unigrams = containers.nGrams.unigrams(review_data)
+
 
   @classmethod
   def load_from_folder(cls, folder: str) -> "Hotel":

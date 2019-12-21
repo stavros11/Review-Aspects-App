@@ -1,7 +1,8 @@
 import collections
 import pandas as pd
-from tools.stopwords import STOP_WORDS
-from typing import List, Optional, Union
+import spacy
+from tools import stopwords
+from typing import Any, Dict, List, Iterable, Optional, Union
 
 
 def get_color(positive: bool = True) -> str:
@@ -111,6 +112,58 @@ class Review:
     return text
 
 
+class EnhancedToken:
+
+  def __init__(self, token: spacy.tokens.Token, review: Review):
+    self.token = token
+    self.review = review
+
+  @property
+  def text(self) -> str:
+    return self.token.text
+
+  @property
+  def sentence(self) -> str:
+    return self.token.sent.text
+
+  @property
+  def colored_sentence(self) -> str:
+    color = "SlateBlue"
+    word = self.text
+    colored_word = "<b><font color='{}'>{}</font></b>".format(color, word)
+    return self.sentence.replace(word, colored_word)
+
+
+class nGrams:
+  # TODO: Implement this with `text_to_sentence` instead of `text_to_token`.
+
+  def __init__(self, text_to_token: Dict[str, List[EnhancedToken]]):
+    self.tokens = text_to_token
+    self.scores = self.calculate_scores(self.tokens)
+
+  @classmethod
+  def unigrams(cls, data: pd.DataFrame):
+    """Creates dict from unigrams to spacy tokens"""
+    text_to_token = {}
+    for i, review in enumerate(data.spacy_text):
+      review_obj = Review(review.text, data.iloc[i])
+      for token in review:
+        text = token.text.lower()
+        if len(text) > 1 and text not in stopwords.INVALID_TOKENS:
+          if text in text_to_token:
+            enh_token = EnhancedToken(token, review_obj)
+            text_to_token[text].append(enh_token)
+          else:
+            enh_token = EnhancedToken(token, review_obj)
+            text_to_token[text] = [enh_token]
+    return cls(text_to_token)
+
+  @staticmethod
+  def calculate_scores(d: Dict[str, List[Any]]) -> collections.Counter:
+    """Calculates number of appearances of each token."""
+    return collections.Counter({k: len(v) for k, v in d.items()})
+
+
 class AspectsCollection:
   """Data structure that handles `AspectWord` and `Review` collections.
 
@@ -139,7 +192,7 @@ class AspectsCollection:
       self.reviews.append(review)
 
       for word, score in aspect_counter.items():
-        if word in STOP_WORDS:
+        if word in stopwords.STOP_WORDS:
           continue
 
         if word in self.known_words:

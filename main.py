@@ -75,7 +75,7 @@ def delete(hotelname: str):
   return flask.redirect(flask.url_for("main"))
 
 
-def view_reviews(word_mode: str, hotel: tools.hotel.Hotel):
+def view_reviews(word: str, hotel: tools.hotel.Hotel):
   """Generates the reviews page for a given aspect word.
 
   This is called by `analysis` when a word is given.
@@ -89,10 +89,10 @@ def view_reviews(word_mode: str, hotel: tools.hotel.Hotel):
       This is required because the review page has a link that points back
       to the hotel analysis page.
   """
-  word, mode = word_mode.split("__")
-  color = tools.containers.get_color(mode == "pos")
-  return flask.render_template("reviews.html", hotel=hotel,
-                               word=word, mode=mode, color=color)
+  color = tools.containers.get_color(True) # FIXME: Fix color
+  tokens = hotel.unigrams.tokens[word]
+  return flask.render_template("reviews.html", hotel=hotel, tokens=tokens,
+                               word=word, color=color)
 
 
 @app.route("/analysis/<hotelname>?word=<word>")
