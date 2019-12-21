@@ -82,12 +82,12 @@
 
 			<div class="container" style="width: 95%; center; padding-left: 10%;">
 
-              <div class="column">
+          <div class="column">
 					<div class="col-md-3 animate-box">
 						<article>
-              <center><h3>Positive Aspects</h3></center>
+              <center><h3>Common words</h3></center>
                 <table>
-                  {% for word, appearance in hotel.unigrams.appearances.most_common(n_aspects) %}
+                  {% for word, appearance in hotel.unigrams.common_words(n_aspects) %}
                   <tr>
                   <td class="admin" style="padding-right: 50px;"> <a href= {{ url_for("analysis", hotelname=hotel.id, word=word) }}>{{ word }}</a> </td>
                   <td class="admin" style="padding-right: 15px;"> {{ appearance }} </td>
@@ -99,7 +99,41 @@
                 </table>
 						</article>
 					</div>
-			</div>
+			    </div>
+
+          <div class="column">
+					<div class="col-md-3 animate-box">
+						<article>
+              <center><h3>Common positive</h3></center>
+                <table>
+                  {% for word, appearances in hotel.unigrams.common_positive(n_aspects) %}
+                  <tr>
+                  <td class="admin" style="padding-right: 50px;"> <a href= {{ url_for("analysis", hotelname=hotel.id, word=word) }}>{{ word }}</a> </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ appearances }} </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ "%0.2f"% hotel.unigrams.scores[word] | float }} </td>
+                  </tr>
+                  {% endfor %}
+                </table>
+						</article>
+					</div>
+			    </div>
+
+          <div class="column">
+					<div class="col-md-3 animate-box">
+						<article>
+              <center><h3>Common negative</h3></center>
+                <table>
+                  {% for word, appearances in hotel.unigrams.common_negative(n_aspects) %}
+                  <tr>
+                  <td class="admin" style="padding-right: 50px;"> <a href= {{ url_for("analysis", hotelname=hotel.id, word=word) }}>{{ word }}</a> </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ appearances }} </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ "%0.2f"% hotel.unigrams.scores[word] | float }} </td>
+                  </tr>
+                  {% endfor %}
+                </table>
+						</article>
+					</div>
+			    </div>
 
           <div class="column">
 					<div class="col-md-4 animate-box">

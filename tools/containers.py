@@ -3,7 +3,7 @@ import pandas as pd
 import spacy
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from tools import stopwords
-from typing import Any, Dict, List, Sequence
+from typing import Dict, List, Sequence, Tuple
 
 
 SID = SentimentIntensityAnalyzer()
@@ -100,9 +100,27 @@ class nGrams:
 
   def __init__(self, sentences: Dict[str, SentenceCollection]):
     self.sentences = sentences
-    self.appearances = collections.Counter(
-        {k: len(v) for k, v in sentences.items()})
 
+    self.appearances = collections.Counter()
+    self.scores = collections.Counter()
+    for word, collection in sentences.items():
+      self.appearances[word] = len(collection)
+      self.scores[word] = sum(collection.sentiment_scores.values())
+
+  def common_words(self, n: int) -> List[Tuple[Sentence, int]]:
+    return self.appearances.most_common(n)
+
+  def common_positive(self, n: int) -> List[Tuple[Sentence, int]]:
+    appearances = collections.Counter(
+         {word: sentence.sentiment_counter["pos"]
+         for word, sentence in self.sentences.items()})
+    return appearances.most_common(n)
+
+  def common_negative(self, n: int) -> List[Tuple[Sentence, int]]:
+    appearances = collections.Counter(
+         {word: sentence.sentiment_counter["neg"]
+         for word, sentence in self.sentences.items()})
+    return appearances.most_common(n)
 
   @classmethod
   def unigrams(cls, data: pd.DataFrame) -> "nGrams":
