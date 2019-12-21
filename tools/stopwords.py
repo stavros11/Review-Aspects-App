@@ -56,3 +56,13 @@ STOP_WORDS.update(contractions)
 for apostrophe in ["‘", "’"]:
     for stopword in contractions:
         STOP_WORDS.add(stopword.replace("'", apostrophe))
+
+
+# Special characters
+SPECIAL_CHARS = set('.,!?/\n;" ()-_&:')
+for n in range(5): SPECIAL_CHARS.add(n * '\n')
+for n in range(5): SPECIAL_CHARS.add(n * ' ')
+SPECIAL_CHARS.add("...")
+
+
+INVALID_TOKENS = STOP_WORDS | SPECIAL_CHARS
