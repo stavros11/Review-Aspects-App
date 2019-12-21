@@ -85,15 +85,18 @@
               <div class="column">
 					<div class="col-md-3 animate-box">
 						<article>
-                            <center><h3>Positive Aspects</h3></center>
-                            <table>
-                              {% for word, score in hotel.unigrams.scores.most_common(n_aspects) %}
-                                <tr>
-                                  <td class="admin" style="padding-right: 50px;"> <a href= {{ url_for("analysis", hotelname=hotel.id, word=word) }}>{{ word }}</a> </td>
-                                  <td class="admin" style="padding-right: 15px;"> {{ score }} </td>
-                                </tr>
-                              {% endfor %}
-                            </table>
+              <center><h3>Positive Aspects</h3></center>
+                <table>
+                  {% for word, appearance in hotel.unigrams.appearances.most_common(n_aspects) %}
+                  <tr>
+                  <td class="admin" style="padding-right: 50px;"> <a href= {{ url_for("analysis", hotelname=hotel.id, word=word) }}>{{ word }}</a> </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ appearance }} </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ hotel.unigrams.sentences[word].sentiment_counter["pos"] }} </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ hotel.unigrams.sentences[word].sentiment_counter["neu"] }} </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ hotel.unigrams.sentences[word].sentiment_counter["neg"] }} </td>
+                  </tr>
+                  {% endfor %}
+                </table>
 						</article>
 					</div>
 			</div>

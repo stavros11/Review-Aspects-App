@@ -72,16 +72,16 @@
 			</div>
 
 			<div class="container">
-        {% for token in tokens %}
+        {% for sentence in sentences %}
 				<div class="row">
 					<div class="col-md-20 animate-box">
 						<article>
-							<h2><a href={{ token.review.data.absoluteUrl }}>{{ token.review.data.title }}</a></h2> -->
-							<p class="admin"><span>{{ token.review.data.publishedDate }}</span><br><span>Rating: {{ token.review.data.rating }} / 5</span><br>
-							<!-- <span>Helpful Votes: {{ token.review.data.helpfulVotes }}</span></p> -->
-							<!-- <p>{{ token.review.colored_text(word) | safe }}</p> -->
-              <p>{{ token.colored_sentence | safe}}</p>
-							<p class="author-wrap"><a href="" class="author">by {{ token.review.data.username }} from {{ token.review.data.user_hometownName }}</a></p> -->
+							<p class="admin"><span>{{ sentence.review.publishedDate }}</span><br><span>Rating: {{ sentence.review.rating }} / 5</span><br></p>
+              <p class="admin"><span>{{ sentence.sentiment["pos"] }}</span><br><span>{{ sentence.sentiment["neu"] }}</span><br><span>{{ sentence.sentiment["neg"] }}</span></p>
+							<!-- <span>Helpful Votes: {{ sentence.review.helpfulVotes }}</span></p> -->
+              <p>{{ sentence.colored | safe}}</p>
+              <p class="author-wrap"><a href={{sentence.review.absoluteUrl}}>Read more</a></p>
+							<p class="author-wrap"><a href="" class="author">by {{ sentence.review.username }} from {{ sentence.review.user_hometownName }}</a></p>
 						</article>
 					</div>
 				</div>

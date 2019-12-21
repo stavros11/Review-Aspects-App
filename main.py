@@ -90,8 +90,8 @@ def view_reviews(word: str, hotel: tools.hotel.Hotel):
       to the hotel analysis page.
   """
   color = tools.containers.get_color(True) # FIXME: Fix color
-  tokens = hotel.unigrams.tokens[word]
-  return flask.render_template("reviews.html", hotel=hotel, tokens=tokens,
+  sentences = hotel.unigrams.sentences[word]
+  return flask.render_template("reviews.html", hotel=hotel, sentences=sentences,
                                word=word, color=color)
 
 
