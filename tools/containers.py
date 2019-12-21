@@ -126,11 +126,14 @@ class nGrams:
   def unigrams(cls, data: pd.DataFrame) -> "nGrams":
     """Creates dict from unigrams to spacy tokens"""
     word_to_sentences = {}
+    VALID_POS_ = {"NOUN", "PROPN"}
+
     for i, doc in enumerate(data.spacy_text):
       review = data.iloc[i]
       for token in doc:
         text = token.text.lower()
-        if len(text) > 1 and text not in stopwords.INVALID_TOKENS:
+        if (len(text) > 1 and text not in stopwords.INVALID_TOKENS
+            and token.pos_ in VALID_POS_):
           sentence = token.sent
           if text in word_to_sentences:
             if sentence == word_to_sentences[text][-1].sentence:
