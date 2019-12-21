@@ -67,15 +67,22 @@ class SentenceCollection:
     self.neu = collections.Counter()
     self.neg = collections.Counter()
     self.sentiment_counter = {"pos": 0, "neu": 0, "neg": 0}
+    self.sentiment_scores = {}
     for sentence in self.list:
       polarity = sentence.polarity
       getattr(self, polarity)[sentence] += sentence.sentiment[polarity]
+      self.sentiment_scores[sentence] = sentence.sentiment["compound"]
       self.sentiment_counter[polarity] += 1
 
   def append(self, sentence: Sentence):
+    if sentence in self.sentiment_scores:
+      raise ValueError("Sentence {} already exists in collection."
+                       "".format(sentence))
+
     self.list.append(sentence)
     polarity = sentence.polarity
     getattr(self, polarity)[sentence] += sentence.sentiment[polarity]
+    self.sentiment_scores[sentence] = sentence.sentiment["compound"]
     self.sentiment_counter[polarity] += 1
 
   def __getitem__(self, i: int) -> Sentence:
@@ -90,7 +97,6 @@ class SentenceCollection:
 
 
 class nGrams:
-  # TODO: Implement this with `text_to_sentence` instead of `text_to_token`.
 
   def __init__(self, sentences: Dict[str, SentenceCollection]):
     self.sentences = sentences
