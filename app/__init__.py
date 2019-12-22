@@ -29,7 +29,9 @@ def upload_zip(file: werkzeug.datastructures.FileStorage):
   file_path = os.path.join(app.config["STORAGE_PATH"], file.filename)
   file.save(file_path)
   hotel_path = utils.unzip(file_path)
-  hotel = models.Hotel.load_from_folder(hotel_path)
+  os.remove(file_path)
+
+  hotel = models.Hotel.create_from_folder(hotel_path)
   db.session.add(hotel)
   db.session.commit()
   return flask.redirect(flask.url_for("main"))

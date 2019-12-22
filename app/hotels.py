@@ -44,7 +44,7 @@ class Hotel(db.Model):
     #return flask.url_for("analysis", hotelname=self.id)
 
   @classmethod
-  def load_from_folder(cls, folder: str) -> "Hotel":
+  def create_from_folder(cls, folder: str) -> "Hotel":
     # FIXME: Create review table in database here!
 
     if not os.path.isdir(folder):
@@ -56,8 +56,10 @@ class Hotel(db.Model):
       raise FileExistsError("Multiple txt files found in {}.".format(folder))
     elif not metafile_dir:
       raise FileNotFoundError("Unable to find txt file in {}.".format(folder))
+
     with open(metafile_dir[0], "r") as file:
       metadata = json.load(file)
+    os.remove(metafile_dir[0])
 
     # Load DataFrame from csv/pkl
     pkl_files = utils.find_files_of_type(folder, target_type="pkl")
@@ -69,8 +71,11 @@ class Hotel(db.Model):
 
     if pkl_files:
       review_data = pd.read_pickle(pkl_files[0])
+      os.remove(pkl_files[0])
     else:
       review_data = pd.read_csv(csv_files[0])
+      os.remove(csv_files[0])
+    os.rmdir(folder)
 
     # If the key `id` is not found in metadata use the folders name
     # The `id` key is required to generate URLs
