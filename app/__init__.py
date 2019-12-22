@@ -8,7 +8,8 @@ app = flask.Flask(__name__)
 # Storage directory
 app.config["STORAGE_PATH"] = "/home/stavros/DATA/TripAdvisorReviews/app_storage"
 # Configure SQL SQLAlchemy
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////home/stavros/DATA/TripAdvisorReviews/app_storage/app.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///{}/app.db".format(
+    app.config["STORAGE_PATH"])
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Number of aspects to show in `analysis` page
 app.config["NUM_ASPECTS"] = 58
@@ -26,16 +27,37 @@ from app import utils
 
 
 def upload_zip(file: werkzeug.datastructures.FileStorage):
+  """Saves and unzips a zip file uploaded by the user."""
   file_path = os.path.join(app.config["STORAGE_PATH"], file.filename)
   file.save(file_path)
+
+  # Unzip the file and remove the zip
   hotel_path = utils.unzip(file_path)
   os.remove(file_path)
 
-  hotel = models.Hotel.create_from_folder(hotel_path)
+  # Read reviews and meta data from files and remove the directory
+  hotel_id = os.path.split(hotel_path)[-1]
+  meta = utils.read_metadata(hotel_path)
+  reviews = utils.read_reviews(hotel_path)
+  os.rmdir(hotel_path)
+
+  # Add hotel to database
+  hotel = models.Hotel.create(hotel_id, meta)
   db.session.add(hotel)
+
+  # Save spacy vocab
+  review = reviews.iloc[0]
+  if "spacy_text" in review:
+    vocab = review["spacy_text"][0].vocab
+    vocab.to_disk(os.path.join(app.config["STORAGE_PATH"],
+                               "vocab_{}".format(hotel_id)))
+  # Add reviews to database
+  for _, review in reviews.iterrows():
+    db.session.add(models.Review.from_series(review, hotel_id))
+
   db.session.commit()
   return flask.redirect(flask.url_for("main"))
-  #return flask.redirect(flask.url_for("analysis", hotelname=hotel.id))
+  #return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
 
 
 @app.route('/', methods=["GET", "POST"])

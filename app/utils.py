@@ -1,6 +1,8 @@
 import os
+import json
 import zipfile
-from typing import List
+import pandas as pd
+from typing import Any, Dict, List
 
 
 def find_files_of_type(folder_path: str, target_type: str = "txt") -> List[str]:
@@ -70,9 +72,32 @@ def zipdir(folder_name: str, folder_dir: str):
   return zip_path
 
 
-  def upload_zip(file: werkzeug.datastructures.FileStorage):
-    file_path = os.path.join(app.config["STORAGE_PATH"], file.filename)
-    file.save(file_path)
-    hotel_path = tools.utils.unzip(file_path)
-    hotel_id = os.path.split(hotel_path)[-1]
-    return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
+def read_metadata(folder: str) -> Dict[str, Any]:
+  if not os.path.isdir(folder):
+    raise FileNotFoundError("Unable to find directory {}.".format(folder))
+
+  # Load hotel metadata (star ratings, etc.)
+  metafile_dir = find_files_of_type(folder, target_type="txt")
+  if len(metafile_dir) > 1:
+    raise FileExistsError("Multiple txt files found in {}.".format(folder))
+  elif not metafile_dir:
+    raise FileNotFoundError("Unable to find txt file in {}.".format(folder))
+
+  with open(metafile_dir[0], "r") as file:
+    metadata = json.load(file)
+  os.remove(metafile_dir[0])
+
+  return metadata
+
+
+def read_reviews(folder: str) -> pd.DataFrame:
+  # Load DataFrame from csv/pkl
+  pkl_files = find_files_of_type(folder, target_type="pkl")
+  if len(pkl_files) > 1:
+    raise FileExistsError("Multiple data files found in {}.".format(folder))
+  elif not pkl_files:
+    raise FileNotFoundError("Unable to data file in {}.".format(folder))
+
+  data = pd.read_pickle(pkl_files[0])
+  os.remove(pkl_files[0])
+  return data
