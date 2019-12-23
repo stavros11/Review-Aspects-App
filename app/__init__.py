@@ -76,8 +76,7 @@ def analysis(hotel_id: str, word: Optional[str] = None):
     raise NotImplementedError
     #return view_reviews(word, hotel)
   hotel = models.Hotel.query.get(hotel_id)
-  reviews = hotel.reviews.order_by(models.Review.publishedDate.desc())
-  return flask.render_template("analysis.html", hotel=hotel, reviews=reviews)
+  return flask.render_template("analysis.html", hotel=hotel)
                                #n_aspects=app.config["NUM_ASPECTS"])
 
 
