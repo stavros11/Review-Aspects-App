@@ -101,37 +101,35 @@
           <div class="column">
 					<div class="col-md-4 animate-box">
 						<article>
-                            <center><h3>Rating Counts</h3></center>
-                            <center><h4>Number of reviews: {{ hotel.n_reviews }}</h4></center>
-                            <div class="chart" id="ratinggraph">
-                                <script>
-                                    var graphs = {{ hotel.rating_counts_piechart | safe }};
-                                    var layout = { <!--xaxis: {title: "Rating", titlefont: {size: 20}, tickfont: {size: 18}},
-                                                   <!--yaxis: {title: "Number of reviews", titlefont: {size: 20}, tickfont: {size: 18}},-->
-                                                   height: 350,
-                                                   margin: {t: 50, b: 30}
-                                                 };
-                                    Plotly.newPlot('ratinggraph', graphs, layout);
-                                </script>
-                            </div>
+              <center><h3>Rating Counts</h3></center>
+              <center><h4>Number of reviews: {{ hotel.n_reviews }}</h4></center>
+                <div class="chart" id="ratinggraph">
+                <script>
+                  var graphs = {{ hotel.rating_counts_piechart | safe }};
+                  var layout = { <!--xaxis: {title: "Rating", titlefont: {size: 20}, tickfont: {size: 18}},
+                                 <!--yaxis: {title: "Number of reviews", titlefont: {size: 20}, tickfont: {size: 18}},-->
+                                  height: 350,
+                                  margin: {t: 50, b: 30}};
+                  Plotly.newPlot('ratinggraph', graphs, layout);
+                </script>
+                </div>
 						</article>
 					</div>
 
 					<div class="col-md-4 animate-box">
 						<article>
-                            <center><h3>Category Ratings</h3></center>
-                            <div class="chart" id="categoriesgraph">
-                                <script>
-                                    var graphs = {{ hotel.additionalrating_barchart | safe }};
-                                    var layout = { xaxis: {title: "Rating", titlefont: {size: 20}, tickfont: {size: 18},
-                                                           tickvals: [0, 1, 2, 3, 4, 5], range: [0, 5]},
-                                                   yaxis: {tickfont: {size: 15}},
-                                                   height: 300,
-                                                   margin: {t: 20, b: 70}
-                                                 };
-                                    Plotly.newPlot('categoriesgraph', graphs, layout);
-                                </script>
-                            </div>
+            <center><h3>Category Ratings</h3></center>
+            <div class="chart" id="categoriesgraph">
+            <script>
+              var graphs = {{ hotel.additionalrating_barchart | safe }};
+              var layout = { xaxis: {title: "Rating", titlefont: {size: 20}, tickfont: {size: 18},
+                             tickvals: [0, 1, 2, 3, 4, 5], range: [0, 5]},
+                             yaxis: {tickfont: {size: 15}},
+                             height: 300, margin: {t: 20, b: 70}
+                              };
+              Plotly.newPlot('categoriesgraph', graphs, layout);
+              </script>
+              </div>
 						</article>
 					</div>
 
