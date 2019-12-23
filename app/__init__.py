@@ -23,6 +23,7 @@ import os
 import werkzeug
 from app import models
 from app import utils
+from app import ngrams
 from typing import Optional
 
 
@@ -54,6 +55,8 @@ def upload_zip(file: werkzeug.datastructures.FileStorage):
   # Add reviews to database
   for _, review in reviews.iterrows():
     db.session.add(models.Review.from_series(review, hotel_id))
+    for pos, sent in enumerate(review["spacy_text"].sents):
+      db.session.add(models.Sentence.create(review.id, pos, sent.text))
 
   db.session.commit()
   return flask.redirect(flask.url_for("main"))
@@ -76,8 +79,8 @@ def analysis(hotel_id: str, word: Optional[str] = None):
     raise NotImplementedError
     #return view_reviews(word, hotel)
   hotel = models.Hotel.query.get(hotel_id)
-  return flask.render_template("analysis.html", hotel=hotel)
-                               #n_aspects=app.config["NUM_ASPECTS"])
+  return flask.render_template("analysis.html", hotel=hotel,
+                               n_aspects=app.config["NUM_ASPECTS"])
 
 
 @app.route('/', methods=["GET", "POST"])

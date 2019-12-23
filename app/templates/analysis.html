@@ -87,10 +87,10 @@
 						<article>
               <center><h3>Common words</h3></center>
                 <table>
-                  {% for review in hotel.get_reviews() %}
+                  {% for word, appearances in hotel.common_unigrams[:n_aspects] %}
                   <tr>
-                  <td class="admin" style="padding-right: 15px;"> {{ review.title }} </td>
-                  <td class="admin" style="padding-right: 15px;"> {{ review.publishedDate }} </td>
+                  <td class="admin" style="padding-right: 50px;"> {{ word }} </td>
+                  <td class="admin" style="padding-right: 15px;"> {{ appearances }} </td>
                   </tr>
                   {% endfor %}
                 </table>

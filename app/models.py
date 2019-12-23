@@ -1,13 +1,17 @@
+import os
+import collections
 import flask
 import pandas as pd
 import json
+import spacy
+from app import app
 from app import db
 from app import stopwords
 
 import plotly
 from plotly import graph_objects as go
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 
 class Hotel(db.Model):
@@ -24,7 +28,24 @@ class Hotel(db.Model):
   additionalRatings_serialized = db.Column(db.String(128))
 
   def __repr__(self):
-    return '<Hotel {}>'.format(self.username)
+    return '<Hotel {}>'.format(self.id)
+
+  @classmethod
+  def create(cls, id: str, metadata: Dict[str, Any]) -> "Hotel":
+    # If the key `id` is not found in metadata use the folders name
+    # The `id` key is required to generate URLs
+    if "id" in metadata:
+      raise KeyError("Hotel ID found in metadata txt.")
+
+    metadata["id"] = id
+    metadata["ratingCounts_serialized"] = json.dumps(
+        metadata.pop("ratingCounts"))
+    metadata["languageCounts_serialized"] = json.dumps(
+        metadata.pop("languageCounts"))
+    metadata["additionalRatings_serialized"] = json.dumps(
+        metadata.pop("additionalRatings"))
+
+    return cls(**metadata)
 
   @property
   def n_reviews(self) -> int:
@@ -51,22 +72,15 @@ class Hotel(db.Model):
     """URL that redirects back to the hotel's main page."""
     return flask.url_for("analysis", hotel_id=self.id)
 
-  @classmethod
-  def create(cls, id: str, metadata: Dict[str, Any]) -> "Hotel":
-    # If the key `id` is not found in metadata use the folders name
-    # The `id` key is required to generate URLs
-    if "id" in metadata:
-      raise KeyError("Hotel ID found in metadata txt.")
+  def count_unigrams(self) -> collections.Counter:
+    unigrams = collections.Counter()
+    for review in self.reviews:
+      unigrams += review.count_unigrams()
+    return unigrams
 
-    metadata["id"] = id
-    metadata["ratingCounts_serialized"] = json.dumps(
-        metadata.pop("ratingCounts"))
-    metadata["languageCounts_serialized"] = json.dumps(
-        metadata.pop("languageCounts"))
-    metadata["additionalRatings_serialized"] = json.dumps(
-        metadata.pop("additionalRatings"))
-
-    return cls(**metadata)
+  @property
+  def common_unigrams(self) -> List[Tuple[str, int]]:
+    return self.count_unigrams().most_common()
 
   @staticmethod
   def encode_plot(*plot):
@@ -111,61 +125,66 @@ class Review(db.Model):
 
   title = db.Column(db.String(2048))
   text = db.Column(db.String(100000))
-  spacy_text = db.Column(db.String(500000))
+  spacyText_bytes = db.Column(db.String(500000))
 
   hotelId = db.Column(db.String(128), db.ForeignKey("hotel.id"))
+  sentences = db.relationship("Sentence", lazy="dynamic")
 
-  _VALID_KEYS = {"id", "absoluteUrl", "createdDate", "stayDate",
+  VALID_KEYS = {"id", "absoluteUrl", "createdDate", "stayDate",
                  "publishedDate", "rating",
                  "username", "userId", "user_hometownId", "user_hometownName",
                  "title", "text", "spacy_text", "hotelId"}
 
+  VALID_UNIGRAM_POS_ = {"NOUN", "PROPN"}
+
+  def __repr__(self):
+    return '<Review {} of Hotel {}>'.format(self.id, self.hotelId)
+
   @classmethod
   def from_series(cls, data: pd.Series, hotel_id: str):
-    args = {k: v for k, v in data.items() if k in cls._VALID_KEYS}
+    args = {k: v for k, v in data.items() if k in cls.VALID_KEYS}
     args["hotelId"] = hotel_id
 
     if "spacy_text" in args and not isinstance(args["spacy_text"], bytes):
-      args["spacy_text"] = args.pop("spacy_text").to_bytes()
+      args["spacyText_bytes"] = args.pop("spacy_text").to_bytes()
 
     return cls(**args)
 
+  @property
+  def spacy_text(self) -> spacy.tokens.Doc:
+    vocab_path = os.path.join(app.config["STORAGE_PATH"],
+                              "vocab_{}".format(self.hotelId))
+    vocab = spacy.vocab.Vocab().from_disk(vocab_path)
+    doc = spacy.tokens.Doc(vocab).from_bytes(self.spacyText_bytes)
+    return doc
 
-sentences = db.Table('tags',
-    db.Column('unigram_text', db.String(64), db.ForeignKey('unigram.text'),
-              primary_key=True),
-    db.Column('sentence_id', db.Integer, db.ForeignKey('sentence.id'),
-              primary_key=True))
+  def count_unigrams(self):
+    unigrams = collections.Counter()
+    for pos, sent in enumerate(self.spacy_text.sents):
+      for token in sent:
+        text = token.text.lower()
+        if (len(text) > 1 and text not in stopwords.INVALID_TOKENS
+            and token.pos_ in self.VALID_UNIGRAM_POS_):
+          unigrams[text] += 1
+    return unigrams
 
 
-class Unigram(db.Model):
-  text = db.Column(db.String(64), primary_key=True)
-  score = db.Column(db.Float)
-  sentences = db.relationship("Sentence", secondary=sentences, lazy="subquery",
-                              backref=db.backref("unigrams", lazy=True))
-
-  VALID_POS_ = {"NOUN", "PROPN"}
-
-  @classmethod
-  def unigrams(cls, doc: "spacy.tokens.Doc"):
-    """Creates dict from unigrams to spacy tokens"""
-    word_to_sentences = {} # Dict[str, List[spacy.tokens.Span]]
-    for token in doc:
-      text = token.text.lower()
-      if (len(text) > 1 and text not in stopwords.INVALID_TOKENS
-          and token.pos_ in cls.VALID_POS_):
-        sentence = token.sent
-        if text in word_to_sentences:
-          if sentence == word_to_sentences[text][-1].sentence:
-            word_to_sentences[text][-1].append(token)
-          else:
-            word_to_sentences[text].append(Sentence(sentence, token, review))
-        else:
-          word_to_sentences[text] = SentenceCollection(
-              text, Sentence(sentence, token, review))
-    return cls(word_to_sentences)
+#sentences = db.Table('sentences',
+#    db.Column('unigram_text', db.String(64), db.ForeignKey('unigram.text'),
+#              primary_key=True),
+#    db.Column('sentence_id', db.Integer, db.ForeignKey('sentence.id'),
+#              primary_key=True))
 
 
 class Sentence(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  text = db.Column(db.String(10000))
+  # id has the format "{reviewId}_{position in review}"
+  id = db.Column(db.String(128), primary_key=True)
+  position = db.Column(db.Integer)
+  reviewId = db.Column(db.Integer, db.ForeignKey("review.id"))
+  score = db.Column(db.Float)
+
+  @classmethod
+  def create(cls, reviewId: int, position: int, text: str):
+    id = "_".join([str(reviewId), str(position)])
+    # TODO: Implement score using a sentiment classifier
+    return cls(id=id, position=position, reviewId=reviewId)
