@@ -19,11 +19,11 @@ db = flask_sqlalchemy.SQLAlchemy(app)
 migrate = flask_migrate.Migrate(app, db)
 
 
-
 import os
 import werkzeug
 from app import models
 from app import utils
+from typing import Optional
 
 
 def upload_zip(file: werkzeug.datastructures.FileStorage):
@@ -58,6 +58,27 @@ def upload_zip(file: werkzeug.datastructures.FileStorage):
   db.session.commit()
   return flask.redirect(flask.url_for("main"))
   #return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
+
+
+@app.route("/analysis/<hotel_id>?word=<word>")
+@app.route("/analysis/<hotel_id>")
+def analysis(hotel_id: str, word: Optional[str] = None):
+  """Generates the analysis page (with aspects and visualizations).
+
+  Args:
+    hotel_id: The hotel id which is the name of the folder that contains
+      hotel's data in the STORAGE PATH.
+    word: A word aspect for generating the corresponding reviews page.
+      See `word_mode` description in `view_reviews` for more details.
+  """
+  # TODO: Implement word merging
+  if word is not None:
+    raise NotImplementedError
+    #return view_reviews(word, hotel)
+  hotel = models.Hotel.query.get(hotel_id)
+  reviews = hotel.reviews.order_by(models.Review.publishedDate.desc())
+  return flask.render_template("analysis.html", hotel=hotel, reviews=reviews)
+                               #n_aspects=app.config["NUM_ASPECTS"])
 
 
 @app.route('/', methods=["GET", "POST"])

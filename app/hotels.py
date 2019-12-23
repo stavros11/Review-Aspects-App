@@ -40,8 +40,7 @@ class Hotel(db.Model):
   @property
   def app_url(self):
     """URL that redirects back to the hotel's main page."""
-    return flask.url_for("main")
-    #return flask.url_for("analysis", hotelname=self.id)
+    return flask.url_for("analysis", hotel_id=self.id)
 
   @classmethod
   def create(cls, id: str, metadata: Dict[str, Any]) -> "Hotel":

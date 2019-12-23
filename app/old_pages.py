@@ -78,24 +78,3 @@ def view_reviews(word: str, hotel: tools.hotel.Hotel):
   sentences = hotel.unigrams.sentences[word]
   return flask.render_template("reviews.html", hotel=hotel, sentences=sentences,
                                word=word, color=color)
-
-
-@app.route("/analysis/<hotelname>?word=<word>")
-@app.route("/analysis/<hotelname>")
-def analysis(hotelname: str, word: Optional[str] = None):
-  """Generates the analysis page (with aspects and visualizations).
-
-  Args:
-    hotelname: The hotel id which is the name of the folder that contains
-      hotel's data in the STORAGE PATH.
-    word: A word aspect for generating the corresponding reviews page.
-      See `word_mode` description in `view_reviews` for more details.
-  """
-  # hotelname is the name of the folder that contains all hotel files
-  hotel_path = os.path.join(app.config["STORAGE_PATH"], hotelname)
-  hotel = tools.hotel.Hotel.load_from_folder(hotel_path)
-  # TODO: Implement word merging
-  if word is not None:
-    return view_reviews(word, hotel)
-  return flask.render_template("analysis.html", hotel=hotel,
-                               n_aspects=app.config["NUM_ASPECTS"])
