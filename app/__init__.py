@@ -55,8 +55,15 @@ def upload_zip(file: werkzeug.datastructures.FileStorage):
   # Add reviews to database
   for _, review in reviews.iterrows():
     db.session.add(models.Review.from_series(review, hotel_id))
+    # Add sentences to database
     for pos, sent in enumerate(review["spacy_text"].sents):
       db.session.add(models.Sentence.create(review.id, pos, sent.text))
+
+  # Add unigrams to database
+  # TODO: Remove `ngrams` and move unigram creation in `Sentence.create`.
+  unigrams = ngrams.create_unigrams(reviews, hotel.id)
+  for unigram_obj in unigrams.values():
+    db.session.add(unigram_obj)
 
   db.session.commit()
   return flask.redirect(flask.url_for("main"))

@@ -22,6 +22,7 @@ class Hotel(db.Model):
   locationId = db.Column(db.Integer)
   accommodationCategory = db.Column(db.String(32))
   reviews = db.relationship("Review", lazy="dynamic")
+  unigrams = db.relationship("Unigram", lazy="dynamic")
 
   ratingCounts_serialized = db.Column(db.String(64))
   languageCounts_serialized = db.Column(db.String(128))
@@ -72,15 +73,10 @@ class Hotel(db.Model):
     """URL that redirects back to the hotel's main page."""
     return flask.url_for("analysis", hotel_id=self.id)
 
-  def count_unigrams(self) -> collections.Counter:
-    unigrams = collections.Counter()
-    for review in self.reviews:
-      unigrams += review.count_unigrams()
-    return unigrams
-
   @property
   def common_unigrams(self) -> List[Tuple[str, int]]:
-    return self.count_unigrams().most_common()
+    counter = collections.Counter({t: t.appearances for t in self.unigrams})
+    return counter.most_common()
 
   @staticmethod
   def encode_plot(*plot):
@@ -135,8 +131,6 @@ class Review(db.Model):
                  "username", "userId", "user_hometownId", "user_hometownName",
                  "title", "text", "spacy_text", "hotelId"}
 
-  VALID_UNIGRAM_POS_ = {"NOUN", "PROPN"}
-
   def __repr__(self):
     return '<Review {} of Hotel {}>'.format(self.id, self.hotelId)
 
@@ -158,22 +152,12 @@ class Review(db.Model):
     doc = spacy.tokens.Doc(vocab).from_bytes(self.spacyText_bytes)
     return doc
 
-  def count_unigrams(self):
-    unigrams = collections.Counter()
-    for pos, sent in enumerate(self.spacy_text.sents):
-      for token in sent:
-        text = token.text.lower()
-        if (len(text) > 1 and text not in stopwords.INVALID_TOKENS
-            and token.pos_ in self.VALID_UNIGRAM_POS_):
-          unigrams[text] += 1
-    return unigrams
 
-
-#sentences = db.Table('sentences',
-#    db.Column('unigram_text', db.String(64), db.ForeignKey('unigram.text'),
-#              primary_key=True),
-#    db.Column('sentence_id', db.Integer, db.ForeignKey('sentence.id'),
-#              primary_key=True))
+unigram_sentences = db.Table('sentences',
+    db.Column('unigram_text', db.String(64), db.ForeignKey('unigram.text'),
+              primary_key=True),
+    db.Column('sentence_id', db.Integer, db.ForeignKey('sentence.id'),
+              primary_key=True))
 
 
 class Sentence(db.Model):
@@ -183,8 +167,25 @@ class Sentence(db.Model):
   reviewId = db.Column(db.Integer, db.ForeignKey("review.id"))
   score = db.Column(db.Float)
 
+  @staticmethod
+  def generate_id(reviewId: int, position: int) -> str:
+    return "_".join([str(reviewId), str(position)])
+
   @classmethod
   def create(cls, reviewId: int, position: int, text: str):
-    id = "_".join([str(reviewId), str(position)])
+    id = cls.generate_id(reviewId, position)
     # TODO: Implement score using a sentiment classifier
     return cls(id=id, position=position, reviewId=reviewId)
+    # TODO: Move unigram creation here
+
+
+class Unigram(db.Model):
+  text = db.Column(db.String(128), primary_key=True)
+  hotelId = db.Column(db.String(128), db.ForeignKey("hotel.id"))
+  sentences = db.relationship("Sentence", secondary=unigram_sentences,
+                              lazy='subquery',
+                              backref=db.backref("unigrams", lazy=True))
+
+  @property
+  def appearances(self):
+    return self.sentences.count()
