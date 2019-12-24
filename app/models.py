@@ -31,27 +31,47 @@ class Unigram(db.Model):
   VALID_UNIGRAM_POS_ = {"NOUN", "PROPN"}
 
   @property
-  def appearances(self) -> int:
-    return len(self.sentences)
-
-  @property
   def url(self) -> str:
     return flask.url_for("analysis", hotel_id=self.hotelId, word=self.text)
 
   @property
-  def positive_sentences(self) -> collections.Counter:
+  def appearances(self) -> int:
+    return len(self.sentences)
+
+  @property
+  def total_score(self) -> float:
+    """Total sentiment score from all sentences that this unigram appears."""
+    return sum(s.score for s in self.sentences)
+
+  @property
+  def num_positive(self) -> int:
+    """Number of sentences that this unigram appears with positive score."""
+    return len([s for s in self.sentences if s.polarity > 0])
+
+  @property
+  def num_neutral(self) -> int:
+    """Number of sentences that this unigram appears with neutral score."""
+    return len([s for s in self.sentences if s.polarity == 0])
+
+  @property
+  def num_negative(self) -> int:
+    """Number of sentences that this unigram appears with negative score."""
+    return len([s for s in self.sentences if s.polarity < 0])
+
+  @property
+  def positive_sentences(self) -> List[Tuple["Sentence", float]]:
     counter = collections.Counter({s: s.score for s in self.sentences
                                    if s.polarity > 0})
     return counter.most_common()
 
   @property
-  def neutral_sentences(self) -> collections.Counter:
+  def neutral_sentences(self) -> List[Tuple["Sentence", float]]:
     counter = collections.Counter({s: s.score for s in self.sentences
                                    if s.polarity == 0})
     return counter.most_common()
 
   @property
-  def negative_sentences(self) -> collections.Counter:
+  def negative_sentences(self) -> List[Tuple["Sentence", float]]:
     counter = collections.Counter({s: -s.score for s in self.sentences
                                    if s.polarity < 0})
     return counter.most_common()
@@ -160,6 +180,16 @@ class Hotel(db.Model):
   @property
   def common_unigrams(self) -> List[Tuple[Unigram, int]]:
     counter = collections.Counter({t: t.appearances for t in self.unigrams})
+    return counter.most_common()
+
+  @property
+  def positive_unigrams(self) -> List[Tuple[Unigram, float]]:
+    counter = collections.Counter({t: t.num_positive for t in self.unigrams})
+    return counter.most_common()
+
+  @property
+  def negative_unigrams(self) -> List[Tuple[Unigram, float]]:
+    counter = collections.Counter({t: t.num_negative for t in self.unigrams})
     return counter.most_common()
 
   @staticmethod
