@@ -78,7 +78,7 @@
               <center><h3>Positive</h3></center>
               {% for sentence, score in unigram.positive_sentences %}
 							<p class="admin"><span>{{ sentence.review.publishedDate }}  -  Rating: {{ sentence.review.rating }} / 5   -   Score: {{ score }}</span><br></p>
-              <p>{{ sentence.text | safe}}</p>
+              <p>{{ sentence.colored_text(unigram.text, "MediumSeaGreen") | safe}}</p>
               <p class="author-wrap"><a href={{ sentence.review.absoluteUrl }}>Read more</a></p>
 							<p class="author-wrap"><a href="" class="author">by {{ sentence.review.username }} from {{ sentence.review.user_hometownName }}</a></p>
               {% endfor %}
@@ -90,7 +90,7 @@
               <center><h3>Neutral</h3></center>
               {% for sentence, score in unigram.neutral_sentences %}
 							<p class="admin"><span>{{ sentence.review.publishedDate }}  -  Rating: {{ sentence.review.rating }} / 5   -   Score: {{ score }}</span><br></p>
-              <p>{{ sentence.text | safe}}</p>
+              <p>{{ sentence.colored_text(unigram.text, "SlateBlue") | safe}}</p>
               <p class="author-wrap"><a href={{ sentence.review.absoluteUrl }}>Read more</a></p>
 							<p class="author-wrap"><a href="" class="author">by {{ sentence.review.username }} from {{ sentence.review.user_hometownName }}</a></p>
               {% endfor %}
@@ -102,7 +102,7 @@
               <center><h3>Negative</h3></center>
               {% for sentence, score in unigram.negative_sentences %}
 							<p class="admin"><span>{{ sentence.review.publishedDate }}  -  Rating: {{ sentence.review.rating }} / 5   -   Score: {{ score }}</span><br></p>
-              <p>{{ sentence.text | safe}}</p>
+              <p>{{ sentence.colored_text(unigram.text, "Tomato") | safe}}</p>
               <p class="author-wrap"><a href={{ sentence.review.absoluteUrl }}>Read more</a></p>
 							<p class="author-wrap"><a href="" class="author">by {{ sentence.review.username }} from {{ sentence.review.user_hometownName }}</a></p>
               {% endfor %}

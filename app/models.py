@@ -108,6 +108,22 @@ class Sentence(db.Model):
   def text(self) -> str:
     return list(self.review.spacy_text.sents)[self.position].text
 
+  def colored_text(self, word: str, color: str = "SlateBlue") -> str:
+    color_word = lambda word: '<font color="{}"><b>{}</b></font>'.format(
+        color, word)
+
+    full_review = self.review.spacy_text
+    vocab = full_review.vocab
+    sentence_span = list(full_review.sents)[self.position]
+
+    words = [token.text
+             if token.text.lower() != word else color_word(token.text)
+             for token in sentence_span]
+    # TODO: Fix spaces in punctuation
+
+    colored_doc = spacy.tokens.Doc(vocab, words=words)
+    return colored_doc.text
+
   @property
   def polarity(self, cutoff: float = 0.2) -> int:
     if self.score > cutoff:
