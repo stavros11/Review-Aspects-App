@@ -10,6 +10,8 @@ from app import stopwords
 
 import plotly
 from plotly import graph_objects as go
+from nltk.sentiment import vader
+SID = vader.SentimentIntensityAnalyzer()
 
 from typing import Any, Dict, List, Tuple
 
@@ -36,6 +38,24 @@ class Unigram(db.Model):
   def url(self) -> str:
     return flask.url_for("analysis", hotel_id=self.hotelId, word=self.text)
 
+  @property
+  def positive_sentences(self) -> collections.Counter:
+    counter = collections.Counter({s: s.score for s in self.sentences
+                                   if s.polarity > 0})
+    return counter.most_common()
+
+  @property
+  def neutral_sentences(self) -> collections.Counter:
+    counter = collections.Counter({s: s.score for s in self.sentences
+                                   if s.polarity == 0})
+    return counter.most_common()
+
+  @property
+  def negative_sentences(self) -> collections.Counter:
+    counter = collections.Counter({s: -s.score for s in self.sentences
+                                   if s.polarity < 0})
+    return counter.most_common()
+
 
 class Sentence(db.Model):
   # id has the format "{reviewId}_{position in review}"
@@ -51,9 +71,11 @@ class Sentence(db.Model):
     return "_".join([str(reviewId), str(position)])
 
   @classmethod
-  def create(cls, position: int, reviewId: int):
+  def create(cls, position: int, reviewId: int, text: str):
     id = cls.generate_id(reviewId, position)
-    return cls(id=id, position=position, reviewId=reviewId)
+    sentiment = SID.polarity_scores(text)
+    score = sentiment["compound"]
+    return cls(id=id, position=position, reviewId=reviewId, score=score)
 
   @property
   def review(self) -> "Review":
@@ -65,6 +87,15 @@ class Sentence(db.Model):
   @property
   def text(self) -> str:
     return list(self.review.spacy_text.sents)[self.position].text
+
+  @property
+  def polarity(self, cutoff: float = 0.2) -> int:
+    if self.score > cutoff:
+      return 1
+    elif self.score < - cutoff:
+      return -1
+    else:
+      return 0
 
 
 class Hotel(db.Model):
@@ -217,7 +248,7 @@ class Review(db.Model):
     sentences = []
     for pos, sent in enumerate(self.spacy_text.sents):
       # TODO: Implement score using a sentiment classifier
-      sentence = Sentence.create(position=pos, reviewId=self.id)
+      sentence = Sentence.create(position=pos, reviewId=self.id, text=sent.text)
       sentences.append(sentence)
       for token in sent:
         text = token.text.lower()

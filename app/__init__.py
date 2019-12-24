@@ -66,8 +66,7 @@ def upload_zip(file: werkzeug.datastructures.FileStorage):
       db.session.add(unigram)
 
   db.session.commit()
-  return flask.redirect(flask.url_for("main"))
-  #return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
+  return flask.redirect(flask.url_for("analysis", hotelname=hotelname))
 
 
 @app.route("/analysis/<hotel_id>?word=<word>")
