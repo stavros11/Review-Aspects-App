@@ -23,7 +23,6 @@ import os
 import werkzeug
 from app import models
 from app import utils
-from app import ngrams
 from typing import Optional
 
 
@@ -52,18 +51,19 @@ def upload_zip(file: werkzeug.datastructures.FileStorage):
     vocab = review["spacy_text"][0].vocab
     vocab.to_disk(os.path.join(app.config["STORAGE_PATH"],
                                "vocab_{}".format(hotel_id)))
-  # Add reviews to database
-  for _, review in reviews.iterrows():
-    db.session.add(models.Review.from_series(review, hotel_id))
-    # Add sentences to database
-    for pos, sent in enumerate(review["spacy_text"].sents):
-      db.session.add(models.Sentence.create(review.id, pos, sent.text))
 
-  # Add unigrams to database
-  # TODO: Remove `ngrams` and move unigram creation in `Sentence.create`.
-  unigrams = ngrams.create_unigrams(reviews, hotel.id)
-  for unigram_obj in unigrams.values():
-    db.session.add(unigram_obj)
+  # Add reviews to database
+  unigrams = {}
+  for _, review in reviews.iterrows():
+    review_obj = models.Review.from_series(review, hotel_id)
+    # Add sentences to database
+    sentences, unigrams = review_obj.create_sentences(unigrams)
+    db.session.add(review_obj)
+    #for sentence in sentences:
+    #  db.session.add(sentence)
+    # Add unigrams to database
+    for unigram in unigrams.values():
+      db.session.add(unigram)
 
   db.session.commit()
   return flask.redirect(flask.url_for("main"))
@@ -82,10 +82,11 @@ def analysis(hotel_id: str, word: Optional[str] = None):
       See `word_mode` description in `view_reviews` for more details.
   """
   # TODO: Implement word merging
-  if word is not None:
-    raise NotImplementedError
-    #return view_reviews(word, hotel)
   hotel = models.Hotel.query.get(hotel_id)
+  if word is not None:
+    unigram = models.Unigram.query.get(word)
+    flask.render_template("reviews.html", hotel=hotel, unigram=unigram)
+    #return view_reviews(word, hotel)
   return flask.render_template("analysis.html", hotel=hotel,
                                n_aspects=app.config["NUM_ASPECTS"])
 

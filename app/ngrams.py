@@ -3,8 +3,6 @@ from app import models
 from app import stopwords
 from typing import Dict, List
 
-VALID_UNIGRAM_POS_ = {"NOUN", "PROPN"}
-
 
 def create_unigrams(reviews: pd.DataFrame, hotel_id: str) -> Dict[str, models.Unigram]:
   word_to_db = {}
