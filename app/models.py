@@ -44,6 +44,8 @@ class Sentence(db.Model):
   reviewId = db.Column(db.Integer, db.ForeignKey("review.id"))
   score = db.Column(db.Float)
 
+  _review = None
+
   @staticmethod
   def generate_id(reviewId: int, position: int) -> str:
     return "_".join([str(reviewId), str(position)])
@@ -52,6 +54,17 @@ class Sentence(db.Model):
   def create(cls, position: int, reviewId: int):
     id = cls.generate_id(reviewId, position)
     return cls(id=id, position=position, reviewId=reviewId)
+
+  @property
+  def review(self) -> "Review":
+    if self._review is not None:
+      return self._review
+    self._review = Review.query.get(self.reviewId)
+    return self._review
+
+  @property
+  def text(self) -> str:
+    return list(self.review.spacy_text.sents)[self.position].text
 
 
 class Hotel(db.Model):

@@ -85,7 +85,7 @@ def analysis(hotel_id: str, word: Optional[str] = None):
   hotel = models.Hotel.query.get(hotel_id)
   if word is not None:
     unigram = models.Unigram.query.get(word)
-    flask.render_template("reviews.html", hotel=hotel, unigram=unigram)
+    return flask.render_template("reviews.html", hotel=hotel, unigram=unigram)
     #return view_reviews(word, hotel)
   return flask.render_template("analysis.html", hotel=hotel,
                                n_aspects=app.config["NUM_ASPECTS"])
