@@ -87,12 +87,12 @@
 						<article>
               <center><h3>Common words</h3></center>
                 <table>
-                  {% for unigram, appearances in hotel.common_unigrams[:n_aspects] %}
+                  {% for unigram, _ in hotel.common_unigrams[:n_aspects] %}
                   <tr>
                   <td class="admin" style="padding-right: 50px;"><a href={{ unigram.url }}> {{ unigram.text }} </td>
-                  <td class="admin" style="padding-right: 15px;"> {{ appearances }} </td>
-                  <td class="admin" style="padding-right: 15px;"><font color="MediumSeaGreen"> {{ unigram.num_positive }} </font></td>
-                  <td class="admin" style="padding-right: 15px;"><font color="Tomato"> {{ unigram.num_negative }} </font></td>
+                  <td class="admin" style="padding-right: 15px;"> {{ unigram.appearances }} </td>
+                  <td class="admin" style="padding-right: 15px;"><font color="MediumSeaGreen"> {{ '%0.1f' % unigram.percentage_positive | float }} </font></td>
+                  <td class="admin" style="padding-right: 15px;"><font color="Tomato"> {{ '%0.1f' % unigram.percentage_negative | float }} </font></td>
                   </tr>
                   {% endfor %}
                 </table>
@@ -105,12 +105,12 @@
 						<article>
               <center><h3>Positive words</h3></center>
                 <table>
-                  {% for unigram, appearances in hotel.positive_unigrams[:n_aspects] %}
+                  {% for unigram, _ in hotel.positive_unigrams[:n_aspects] %}
                   <tr>
                   <td class="admin" style="padding-right: 50px;"><a href={{ unigram.url }}> {{ unigram.text }} </td>
-                  <td class="admin" style="padding-right: 15px;"> {{ appearances }} </td>
-                  <td class="admin" style="padding-right: 15px;"><font color="MediumSeaGreen"> {{ unigram.num_positive }} </font></td>
-                  <td class="admin" style="padding-right: 15px;"><font color="Tomato"> {{ unigram.num_negative }} </font></td>
+                  <td class="admin" style="padding-right: 15px;"> {{ unigram.appearances }} </td>
+                  <td class="admin" style="padding-right: 15px;"><font color="MediumSeaGreen"> {{ '%0.1f' % unigram.percentage_positive | float }} </font></td>
+                  <td class="admin" style="padding-right: 15px;"><font color="Tomato"> {{ '%0.1f' % unigram.percentage_negative | float }} </font></td>
                   </tr>
                   {% endfor %}
                 </table>
@@ -123,12 +123,12 @@
 						<article>
               <center><h3>Negative words</h3></center>
                 <table>
-                  {% for unigram, appearances in hotel.negative_unigrams[:n_aspects] %}
+                  {% for unigram, _ in hotel.negative_unigrams[:n_aspects] %}
                   <tr>
                   <td class="admin" style="padding-right: 50px;"><a href={{ unigram.url }}> {{ unigram.text }} </td>
-                  <td class="admin" style="padding-right: 15px;"> {{ appearances }} </td>
-                  <td class="admin" style="padding-right: 15px;"><font color="MediumSeaGreen"> {{ unigram.num_positive }} </font></td>
-                  <td class="admin" style="padding-right: 15px;"><font color="Tomato"> {{ unigram.num_negative }} </font></td>
+                  <td class="admin" style="padding-right: 15px;"> {{ unigram.appearances }} </td>
+                  <td class="admin" style="padding-right: 15px;"><font color="MediumSeaGreen"> {{ '%0.1f' % unigram.percentage_positive | float }} </font></td>
+                  <td class="admin" style="padding-right: 15px;"><font color="Tomato"> {{ '%0.1f' % unigram.percentage_negative | float }} </font></td>
                   </tr>
                   {% endfor %}
                 </table>

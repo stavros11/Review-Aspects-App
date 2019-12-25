@@ -49,6 +49,11 @@ class Unigram(db.Model):
     return len([s for s in self.sentences if s.polarity > 0])
 
   @property
+  def percentage_positive(self) -> float:
+    """Precentage of sentences that this unigram appears with positive score."""
+    return self.num_positive * 100.0 / self.appearances
+
+  @property
   def num_neutral(self) -> int:
     """Number of sentences that this unigram appears with neutral score."""
     return len([s for s in self.sentences if s.polarity == 0])
@@ -57,6 +62,11 @@ class Unigram(db.Model):
   def num_negative(self) -> int:
     """Number of sentences that this unigram appears with negative score."""
     return len([s for s in self.sentences if s.polarity < 0])
+
+  @property
+  def percentage_negative(self) -> float:
+    """Precentage of sentences that this unigram appears with negative score."""
+    return self.num_negative * 100.0 / self.appearances
 
   @property
   def positive_sentences(self) -> List[Tuple["Sentence", float]]:
