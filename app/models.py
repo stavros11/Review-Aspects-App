@@ -227,12 +227,10 @@ class Hotel(db.Model):
 
   @property
   def rating_counts_piechart(self):
-    labels, values = [], []
-    for l, v in pd.value_counts(self.ratingCounts).items():
-      labels.append(l)
-      values.append(v)
-    pie = go.Pie(labels=labels, values=values,
-                 marker_colors=self._PIE_COLORS[::-1])
+    values = self.ratingCounts
+    labels = list(range(1, len(values) + 1))
+    pie = go.Pie(labels=labels, values=self.ratingCounts,
+                 marker_colors=self._PIE_COLORS)
     return self.encode_plot(pie)
 
   @property
